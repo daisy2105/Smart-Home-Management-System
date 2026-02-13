@@ -20,7 +20,7 @@ public class AuthUtil {
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(jwtSecretKey.getBytes(StandardCharsets.UTF_8));
     }
-    private Claims extractAllClaims(String jwtToken) {
+    public Claims extractAllClaims(String jwtToken) {
         return Jwts.parser()
                 .verifyWith(getSecretKey())
                 .build()
@@ -31,7 +31,7 @@ public class AuthUtil {
     public String generateJwtToken(SecurityUser securityUser) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role",securityUser.getAuthorities());
-        return Jwts.builder().expiration(new Date(System.currentTimeMillis() + 10000 * 60 * 30))
+        return Jwts.builder().expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
                 .claims(claims)
                 .subject(securityUser.getUsername())
                 .issuedAt(new Date())
@@ -49,5 +49,17 @@ public class AuthUtil {
         String username = getUsernameFromJwtToken(jwtToken);
         return securityUser.getUsername().equals(username) &&!isTokenExpired(jwtToken) ;
     }
+
+    public String generateForgotPasswordToken(String email) {
+
+        return Jwts.builder()
+                .subject(email)
+                .claim("type", "password-reset")
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + (1000 * 60 * 10))) //
+                .signWith(getSecretKey()) // VERY IMPORTANT
+                .compact();
+    }
+
 
 }

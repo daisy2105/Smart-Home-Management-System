@@ -4,6 +4,7 @@ import com.smarthome.energy.entities.EmailOtp;
 import com.smarthome.energy.entities.EmailVerified;
 import com.smarthome.energy.repositories.EmailOtpRepository;
 import com.smarthome.energy.repositories.EmailVerifiedRepository;
+import com.smarthome.energy.security.AuthUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,11 +28,15 @@ public class OtpService {
     private final EmailVerifiedRepository emailVerifiedRepo;
 
 
-    public String generateOtp(String email) {
+
+
+    private String generateOtp(String email) {
         SecureRandom random = new SecureRandom();
         int otp = 100000 + random.nextInt(900000);
         return String.valueOf(otp);
     }
+
+
 
     public void createAndSendOtp(String email) {
         String otp = generateOtp(email);
