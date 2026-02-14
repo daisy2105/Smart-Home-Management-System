@@ -1,8 +1,12 @@
 import React from 'react'
+import LandingPageRoute from './Routes/AppRoutes';
 
 const App = () => {
+
   return (
-    <div>App</div>
+     <div>
+        <LandingPageRoute/>
+    </div>
   )
 }
 
