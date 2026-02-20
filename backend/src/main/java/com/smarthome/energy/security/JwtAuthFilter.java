@@ -4,6 +4,7 @@ package com.smarthome.energy.security;
 import com.smarthome.energy.services.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -29,13 +30,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         log.info("incoming jwt request: {}", request.getRequestURI());
 
-        String authHeader = request.getHeader("Authorization");
-        if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String token = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if("accessToken".equals(cookie.getName())){
+                    token = cookie.getValue();
+                    break;// as found just break
+                }
+            }
+        }
+
+        if(token == null){  //if no token skip jwtFilter.
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authHeader.substring(7);
         try {
             String username = authUtil.getUsernameFromJwtToken(token);
 

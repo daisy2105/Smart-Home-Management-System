@@ -1,7 +1,8 @@
 package com.smarthome.energy.services;
 
+import com.smarthome.energy.dto.AuthJwtResponseDto;
 import com.smarthome.energy.dto.LoginRequestDto;
-import com.smarthome.energy.dto.LoginResponseDto;
+import com.smarthome.energy.dto.AuthResponseDto;
 import com.smarthome.energy.dto.SignupRequestDto;
 import com.smarthome.energy.entities.EmailVerified;
 import com.smarthome.energy.entities.User;
@@ -28,10 +29,10 @@ import java.time.LocalDateTime;
 public class JwtAuthService {
     private final JpaUserRepository jpaUserRepository;
     private final PasswordEncoder passwordEncoder;
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
     private AuthUtil authUtil;
     private final EmailVerifiedRepository emailVerifiedRepo;
-    public @Nullable LoginResponseDto login(LoginRequestDto loginRequestDto) {
+    public AuthJwtResponseDto login(LoginRequestDto loginRequestDto) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(),
@@ -41,10 +42,9 @@ public class JwtAuthService {
                     (SecurityUser) authentication.getPrincipal();
 
             String token = authUtil.generateJwtToken(securityUser);
-            return new LoginResponseDto(
+            return new AuthJwtResponseDto(
                     securityUser.getUser().getName(),
-                    securityUser.getUser().getRole(),
-                    token);
+                    securityUser.getUser().getRole(),token);
         } catch (AuthenticationException e) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,"Invalid email or password"
@@ -54,7 +54,7 @@ public class JwtAuthService {
 
     }
 
-    public @Nullable LoginResponseDto signup(SignupRequestDto signupRequestDto) {
+    public @Nullable AuthJwtResponseDto signup(SignupRequestDto signupRequestDto) {
 
         var existingUser = jpaUserRepository.findByEmail(signupRequestDto.getEmail());
         if (existingUser.isPresent()) {
@@ -95,7 +95,7 @@ public class JwtAuthService {
         SecurityUser su = new SecurityUser(user);
 
         String token = authUtil.generateJwtToken(su);
-        return new LoginResponseDto(
+        return new AuthJwtResponseDto(
                 user.getName(),
                 user.getRole(),
                 token
