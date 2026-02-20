@@ -26,7 +26,7 @@ public class ResetPasswordService {
 
     private String generateResetPasswordLink(String email) {
         String token = authUtil.generateForgotPasswordToken(email);
-        return "http://localhost:3000/reset-password?token=" + token;
+        return "http://localhost:5173/reset-password?token=" + token;
     }
 
     public void createAndSendResetPasswordLink(String email) {

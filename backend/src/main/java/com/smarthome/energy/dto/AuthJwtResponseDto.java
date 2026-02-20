@@ -8,9 +8,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponseDto {
+@NoArgsConstructor
+public class AuthJwtResponseDto {
     private String name;
     private Role role;
     private String token;
