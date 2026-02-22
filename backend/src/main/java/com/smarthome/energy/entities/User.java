@@ -6,6 +6,9 @@ import com.smarthome.energy.model.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -37,5 +40,7 @@ public class User {
     @Column(columnDefinition = "JSON")
     private DevicePreferences preferences;   //without converter hibernate will not understand the type
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Device> devices = new ArrayList<>();
 
 }
