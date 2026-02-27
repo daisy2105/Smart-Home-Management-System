@@ -1,8 +1,6 @@
 import React from "react";
-import { useTheme } from "../../../context/ThemeContext.jsx";
 
 const CTASection = () => {
-  const { darkMode } = useTheme();
 
   return (
     <section className="py-24 bg-blue-600 dark:bg-blue-900 transition-colors duration-300">
