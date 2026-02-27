@@ -1,5 +1,4 @@
 import React from "react";
-import { useTheme } from "../../context/ThemeContext.jsx";
 import {
   Wifi,
   Thermometer,
@@ -12,7 +11,6 @@ import {
 } from "lucide-react";
 
 const FeaturePage = () => {
-  const { darkMode } = useTheme();
 
   const features = [
     {

@@ -1,12 +1,12 @@
-import React from 'react'
-import { useTheme } from '../../../context/ThemeContext.jsx'
+import React, { useContext } from 'react'
+import { ThemeContext } from '../../../context/ThemeContext.jsx'
 import Temperature from '../../../assets/temperature.jpeg'
 import smartappliances from '../../../assets/smartappliances.jpeg'
 
 const LeftSideHero = () => {
 
   {/* dark mode state from context*/}
-  const { darkMode, setDarkMode } = useTheme();
+  const { darkMode, setDarkMode } = useContext(ThemeContext);
 
   return (
     <div className='max-w-2xl w-full mb-16 lg:mb-0 ml-0 md:ml-5 px-4 md:px-0'>

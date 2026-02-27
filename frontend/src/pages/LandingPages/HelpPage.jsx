@@ -1,9 +1,7 @@
 import React from "react";
-import { useTheme } from "../../context/ThemeContext.jsx";
 import { HelpCircle, Key, Cpu, BarChart } from "lucide-react";
 
 const HelpPage = () => {
-  const { darkMode } = useTheme();
 
   const faqs = [
     {

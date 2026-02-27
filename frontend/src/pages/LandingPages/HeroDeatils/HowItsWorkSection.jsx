@@ -1,11 +1,9 @@
 import React from "react";
 import Lottie from "lottie-react";
-import { useTheme } from "../../../context/ThemeContext.jsx";
 import { Zap, Home, BarChart, Shield } from "lucide-react";
 import HomeAnimation from "../../../assets/animation/smart home wifi connect.json";
 
 const HowItWorksSection = () => {
-  const { darkMode } = useTheme();
 
   const steps = [
     {
