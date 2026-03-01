@@ -13,6 +13,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+
 @RestController
 @RequestMapping("/auth")
 @AllArgsConstructor
@@ -42,7 +44,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(false)
                 .path("/")
-                .maxAge(3600)
+                .maxAge(Duration.ofDays(1))
                 .build();
         AuthResponseDto authResponseDto = new AuthResponseDto(authJwtResponseDto.getName(), authJwtResponseDto.getRole());
         return ResponseEntity.ok()
