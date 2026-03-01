@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +17,10 @@ import java.util.Map;
 public class AuthUtil {
     @Value("${jwt.secret-key}")
     private String jwtSecretKey;
+    Date expiryDate = new Date(
+            System.currentTimeMillis() + Duration.ofDays(1).toMillis()
+    );
+
 
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(jwtSecretKey.getBytes(StandardCharsets.UTF_8));
@@ -31,7 +36,7 @@ public class AuthUtil {
     public String generateJwtToken(SecurityUser securityUser) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role",securityUser.getAuthorities());
-        return Jwts.builder().expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+        return Jwts.builder().expiration(expiryDate)
                 .claims(claims)
                 .subject(securityUser.getUsername())
                 .issuedAt(new Date())
