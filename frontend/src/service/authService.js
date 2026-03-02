@@ -16,11 +16,16 @@ export const sendOtp = async (data) => {
 };
 
 export const resetPassword = async (data) => {
-  const response = await AxiosInstance.post("/auth/reset-password", data);
+  const response = await AxiosInstance.post("/auth/password-reset", data);
   return response.data;
 };
 
 export const verifyOtp = async (data) => {
   const response = await AxiosInstance.post("/auth/otp/verify", data);
+  return response.data;
+};
+
+export const forgotPassword = async (data) => {
+  const response = await AxiosInstance.post("/auth/password-forgot", data);
   return response.data;
 };
