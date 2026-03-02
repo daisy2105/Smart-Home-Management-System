@@ -5,13 +5,13 @@ import { UserContext } from '../../context/UserContext.jsx';
 import logo from '../../assets/logo.png';
 import Lottie from 'lottie-react';
 import toast, { Toaster } from "react-hot-toast";
-import Loading from '../../assets/animation/loading.json.json';
-import animationData from '../../assets/animation/DataPrivacy.json.json';
+import Loading from '../../assets/animation/loading.json';
+import animationData from '../../assets/animation/DataPrivacy.json';
 
 const SignupPage = () => {
   const [ email , setEmail] = useState('');
   const [loading, setLoading] = useState(false);          //Loading animation state
-  const { setEmailInput } = useContext(UserContext);      // Access setEmailInput from context
+  const { UserDetail, setUserDetail } = useContext(UserContext);      // Access setEmailInput from context
   const navigate = useNavigate();
 
   const submitHandler = async (e) => {
@@ -20,14 +20,15 @@ const SignupPage = () => {
 
     try {
       const response = await sendOtp({ email });
-      setEmailInput(email);           // Store email in context for later use
-      navigate("/verification");      // Redirect to OTP verification page
-    } catch (error) {
-      if (error.response?.status === 401) {
-        toast.error("Email is already used. Please use a different email.");
-      } else {
-        toast.error("Something went wrong. Try again later.");
+
+      setUserDetail({UserEmail:email});           // Store email in context for later use
+      if(UserDetail?.UserEmail === email){
+        toast.error("Email Already Exists. Please Login ")
+      }else{
+        navigate("/verification");      // Redirect to OTP verification page
       }
+    } catch (error) {
+        toast.error("Something went wrong. Try again later.");
     }finally {
       setLoading(false);             // Stop loading animation
     }
