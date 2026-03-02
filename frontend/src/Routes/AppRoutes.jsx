@@ -2,16 +2,16 @@ import React from 'react'
 import { Routes, Route } from 'react-router-dom';
 import LandingPageLayout from '../Layout/LandingPage/LandingPageLayout';
 import AuthenticationPage from '../Layout/AuthenticationPages/AuthenticationPages';
-import SignupPage from '../pages/AuthenticationPages/SignupPage';
+import SignupPage from '../pages/Authentication/SignupPage';
 import HomePage from '../pages/LandingPages/HomePage';
 import AboutUs from '../pages/LandingPages/AboutUsPage';
 import FeaturePage from '../pages/LandingPages/FeaturePage';
 import HelpPage from '../pages/LandingPages/HelpPage';
-import VerificationPage from '../pages/AuthenticationPages/VerificationPage';
-import CreateAccountPage from '../pages/AuthenticationPages/CreateAccountPage';
-import LoginPage from '../pages/AuthenticationPages/LoginPage';
-import ResetPasswordPage from '../pages/AuthenticationPages/ResetPasswordPage';
-import ForgetPasswordPage from '../pages/AuthenticationPages/ForgotPasswordPage';
+import VerificationPage from '../pages/Authentication/VerificationPage';
+import CreateAccountPage from '../pages/Authentication/CreateAccountPage';
+import LoginPage from '../pages/Authentication/LoginPage';
+import ResetPasswordPage from '../pages/Authentication/ResetPasswordPage';
+import ForgetPasswordPage from '../pages/Authentication/ForgotPasswordPage';
 import UnauthorizePage from '../pages/UnauthorizePage'
 
 const AppRoute = () => {
