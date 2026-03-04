@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { forgotPassword } from "../../Service/authService.js";
+import { forgotPassword} from "../../service/authService"
 import logo from "../../assets/logo.png";
 import Lottie from "lottie-react";
 import toast, { Toaster } from "react-hot-toast";
