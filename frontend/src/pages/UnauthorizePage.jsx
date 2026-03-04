@@ -7,10 +7,7 @@ const NotFoundPage = () => {
   const navigate = useNavigate();
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center px-6 text-center 
-                    bg-white text-gray-900 relative overflow-hidden"
-    >
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 text-centerbg-white text-gray-900 relative overflow-hidden">
       {/* Soft Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-100/40 via-transparent to-purple-100/40 blur-3xl" />
 
@@ -38,20 +35,15 @@ const NotFoundPage = () => {
 
         {/* Buttons */}
         <div className="flex flex-wrap gap-4 justify-center mt-10">
-          <button
-            onClick={() => navigate(-1)}
-            className="px-7 py-3 rounded-full border border-gray-300
-                       hover:bg-gray-100 transition-all duration-300"
-          >
+          <button 
+            onClick={() => navigate(-1)} 
+            className="px-7 py-3 rounded-full border border-gray-300 hover:bg-gray-100 transition-all duration-300">
             Go Back
           </button>
 
           <button
             onClick={() => navigate("/")}
-            className="px-7 py-3 rounded-full bg-blue-600 text-white
-                       hover:bg-blue-700 hover:scale-105 active:scale-95
-                       transition-all duration-300 font-medium"
-          >
+            className="px-7 py-3 rounded-full bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all duration-300 font-medium">
             Go Home
           </button>
         </div>

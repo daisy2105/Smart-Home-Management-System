@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/UserContext.jsx";
 import toast, { Toaster } from "react-hot-toast";
-import { createAccount } from "../../Service/authService.js";
+import { createAccount } from "../../service/authService.js";
 import logo from "../../assets/logo.png";
 import Lottie from "lottie-react";
 import { Eye, EyeOff } from "lucide-react";
@@ -14,7 +14,7 @@ const CreateAccountPage = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
-  const { UserDetail, setUserDetail } = useContext(UserContext);
+  const { SignUpUser, setUserDetail } = useContext(UserContext);
   const [loading, setLoading] = useState(false);                //Loading animation state
   const [showPassword, setShowPassword] = useState(false);
 
@@ -28,30 +28,28 @@ const CreateAccountPage = () => {
 
     try {
       const response = await createAccount({            // Send email, name, password, and role to backend for account creation
-        email:UserDetail?.UserEmail,
+        email:SignUpUser?.UserEmail,              // Getting User Email from UserContext 
         name,
         password,
         role,
       });
 
-      navigate('/dashboard')
-      setUserDetail({                                    // Store role in context for later use
-        UserRole:response.role.toLowerCase(),
-        UserName:response.name
-      });
+      setUserDetail(response)                 // Add User response in context for Future use
+      navigate("/dashboard");
+      
     } catch (error) {
       if (error.response?.status === 400) {
-        toast.error("Password must be at least 6 characters long and include at least one special character.");
+        toast.error("Invalid data provided");
       } /* else if(error.response?.status === 409){
         toast.error("Email Already Exists")
       }*/ else {
         toast.error("Something went wrong. Try again later.");
       }
-    }finally {
-      setLoading(false);             // Stop loading animation
-    }
-  };
-
+      } finally {
+        setLoading(false);             // Stop loading animation
+      }
+    };
+    
   return (
     <>
     {/* Loading animation */}
@@ -130,7 +128,7 @@ const CreateAccountPage = () => {
               </label>
               <input
                 type="email"
-                value={UserDetail?.UserEmail || ""}
+                value={SignUpUser?.UserEmail}
                 readOnly
                 className="w-full px-5 py-4 text-lg rounded-xl border border-gray-300 bg-gray-100"
               />

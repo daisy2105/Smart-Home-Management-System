@@ -3,20 +3,29 @@ import { UserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 
 const RoleBasedRedirect = () => {
-  const { UserDetail } = useContext(UserContext);
+  const { UserDetail, SignUpUser } = useContext(UserContext);     //In SignUpUser store user detail which store in create Account page
   const navigate = useNavigate();
 
-  console.log(UserDetail?.UserRole)
+  const role = UserDetail?.role || SignUpUser?.role     // Getting Role from context for checking user role
 
-  useEffect(() => {
-    if (UserDetail?.UserRole === "admin") {
-      navigate("/admin/dashboard");
-    } else if (UserDetail?.UserRole === "homeowner") {
-      navigate("/homeowner/dashboard");
-    } else if (UserDetail?.UserRole === "technician") {
-      navigate("/technician/dashboard");
+  useEffect(() => {                    // Role Based Redirect User
+    switch (role) {
+      case "ADMIN":
+        navigate("/admin/dashboard");
+        break;
+
+      case "HOMEOWNER":
+        navigate("/homeowner/dashboard");
+        break;
+
+      case "TECHNICIAN":
+        navigate("/technician/dashboard");
+        break;
+
+      default:
+        navigate("/unauthorized");
     }
-  }, [UserDetail, navigate]);
+  }, [role, navigate]);
 
   return null;
 };

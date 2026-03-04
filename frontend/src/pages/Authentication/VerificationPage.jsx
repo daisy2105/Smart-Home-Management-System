@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { UserContext } from "../../context/UserContext.jsx";
 import { useNavigate } from "react-router-dom";
-import { verifyOtp } from "../../Service/authService.js";
+import { verifyOtp } from "../../service/authService.js";
 import logo from "../../assets/logo.png";
 import Lottie from "lottie-react";
 import toast, { Toaster } from "react-hot-toast";
@@ -11,11 +11,11 @@ import animationData from "../../assets/animation/DataPrivacy.json";
 const VerificationPage = () => {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);          //Loading animation state
-  const { UserDetail } = useContext(UserContext);      // Access email from context
+  const { SignUpUser } = useContext(UserContext);      // Access email from context
   const navigate = useNavigate();
-
+  
   useEffect(() => {
-  toast.success("OTP sent successfully!");       //Show Notification if OTP is sent successfully
+    toast.success("OTP sent successfully!");       //Show Notification if OTP is sent successfully
   }, []);
 
   const submitHandler = async (e) => {
@@ -24,10 +24,9 @@ const VerificationPage = () => {
 
     try {
       const response = await verifyOtp({
-        email:UserDetail?.UserEmail,
+        email: SignUpUser?.UserEmail,               // Used User Email Through the Context
         otp
       });
-
       navigate("/createaccount");                       // Redirect to create account page
     } catch (error) {
       if (error.response?.status === 400) {             // Check if backend returns 401 for incorrect OTP
@@ -123,7 +122,7 @@ const VerificationPage = () => {
               </label>
               <input
                 type="email"
-                value={UserDetail?.UserEmail}     //User Email from context
+                value={SignUpUser?.UserEmail}     //User Email from session storage
                 readOnly
                 className="w-full px-5 py-4 text-lg rounded-xl border border-gray-300 bg-gray-100"
               />

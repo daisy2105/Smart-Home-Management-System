@@ -1,5 +1,5 @@
-import React, { useState, useContext } from "react";
-import { Login } from "../../Service/authService.js";
+import React, { useState, useContext, useEffect } from "react";
+import { getUserDetail, Login } from "../../service/authService.js";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import Lottie from "lottie-react";
@@ -11,36 +11,41 @@ import { UserContext } from "../../context/UserContext.jsx";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
-  const { UserDetail } = useContext(UserContext);
+  const { UserDetail, setUserDetail } = useContext(UserContext);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);          //Loading animation state
   const [showPassword, setShowPassword] = useState(false);
-
   const navigate = useNavigate();
+
+  const Role = UserDetail?.role         //Used Context for getting role of user which is got from backend 
+  useEffect(() => {                 // Redirect if already logged in
+    if (Role) { 
+      navigate("/dashboard");
+    }
+  }, [Role, navigate]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
     setLoading(true);                                      // Start loading animation
 
     try {
-      const response = await Login({
+      const response = await Login({              //sending data to backend for checking user is valid or not 
         email,
         password,
       });
 
-      navigate('/dashboard')
+      const user = await getUserDetail();         //getting User Details from DB through Backend
+      setUserDetail(user)
+
+      navigate("/dashboard");                   //Navigate user to role based dashboard
     } catch (error) {
       if (error.response?.status === 401) {                 //  Check if backend returns 401
-        toast.error("Email is Not Exists. Please Signup");
+        toast.error("Email or password is incorrect.");
       } else {
         toast.error("Something went wrong. Try again later.");
       }
-    }finally {
-      setLoading(false);             // Stop loading animation
     }
-
-    setPassword("");
-  };
+};
 
   return (
     <>

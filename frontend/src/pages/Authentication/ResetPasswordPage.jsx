@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { resetPassword } from "../../Service/authService.js";
+import { resetPassword } from "../../service/authService.js";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import logo from "../../assets/logo.png";
