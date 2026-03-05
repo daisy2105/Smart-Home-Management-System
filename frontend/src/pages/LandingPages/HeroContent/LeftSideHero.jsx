@@ -1,13 +1,8 @@
-import React, { useContext } from 'react'
-import { ThemeContext } from '../../../context/ThemeContext.jsx'
 import Temperature from '../../../assets/temperature.jpeg'
 import smartappliances from '../../../assets/smartappliances.jpeg'
+import DarkModeButton from '../../../components/Button/DarkModeButton'
 
 const LeftSideHero = () => {
-
-  {/* dark mode state from context*/}
-  const { darkMode, setDarkMode } = useContext(ThemeContext);
-
   return (
     <div className='max-w-2xl w-full mb-16 lg:mb-0 ml-0 md:ml-5 px-4 md:px-0'>
 
@@ -38,16 +33,11 @@ const LeftSideHero = () => {
           <img src={Temperature} alt="Temperature" className='w-full sm:w-64 md:w-52 lg:w-64 h-auto object-contain rounded-lg'/>
 
           {/* Dark Mode Toggle */}
-          <div className='flex flex-col items-center bg-black dark:bg-white rounded-lg px-23 py-10 mt-2 md:mt-0'>
-            <p className='text-sm font-medium text-white dark:text-black mb-2'>Dark Mode</p>
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className={`relative w-14 h-7 rounded-full transition ${darkMode ? "bg-green-500" : "bg-gray-400"}`}
-            >
-              <span
-                className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transform transition ${darkMode ? "translate-x-7" : ""}`}
-              ></span>
-            </button>
+        <div className="flex flex-col items-center bg-black dark:bg-white rounded-lg px-23 py-10 mt-2 md:mt-0">
+          <p className="text-sm font-medium text-white dark:text-black mb-2">
+            Dark Mode
+          </p>
+          <DarkModeButton/>
           </div>
         </div>
 
