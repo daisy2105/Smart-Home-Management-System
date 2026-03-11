@@ -2,6 +2,7 @@ package com.smarthome.energy.security;
 
 
 import com.smarthome.energy.services.CustomUserDetailsService;
+import com.smarthome.energy.services.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -23,6 +24,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService customUserDetailsService;
 
     private final AuthUtil authUtil;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -34,6 +36,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
+
                 if("accessToken".equals(cookie.getName())){
                     token = cookie.getValue();
                     break;// as found just break
@@ -41,8 +44,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
         }
 
+
         if(token == null){  //if no token skip jwtFilter.
             filterChain.doFilter(request, response);
+            return;
+        }
+        if(tokenBlacklistService.isBlacklisted(token)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Token revoked");
             return;
         }
 

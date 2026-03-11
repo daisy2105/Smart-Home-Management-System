@@ -65,6 +65,14 @@ public class AuthUtil {
                 .signWith(getSecretKey()) // VERY IMPORTANT
                 .compact();
     }
+    public Date getExpiryDate(String jwtToken) {
+        return extractAllClaims(jwtToken).getExpiration();
+    }
+
+    public long getRemainingExpirationTime(String jwtToken) {
+        Date expiration = getExpiryDate(jwtToken);
+        return expiryDate.getTime() - System.currentTimeMillis();
+    }
 
 
 }

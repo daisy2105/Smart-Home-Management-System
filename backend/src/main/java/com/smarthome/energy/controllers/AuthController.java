@@ -2,8 +2,12 @@ package com.smarthome.energy.controllers;
 
 import com.smarthome.energy.dto.*;
 import com.smarthome.energy.repositories.JpaUserRepository;
+import com.smarthome.energy.security.AuthUtil;
 import com.smarthome.energy.services.JwtAuthService;
+import com.smarthome.energy.services.TokenBlacklistService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +25,8 @@ import java.time.Duration;
 public class AuthController {
     private final JwtAuthService jwtAuthService;
     private final JpaUserRepository jpaUserRepository;
+    private final AuthUtil authUtil;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody LoginRequestDto loginRequestDto) {
@@ -51,6 +57,32 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(authResponseDto);
     }
+    @PostMapping("/logout")
+    public ResponseEntity<String > logout(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ){
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null){
+            for(Cookie cookie : cookies){
+                if("accessToken".equals(cookie.getName())){
+                    String accessToken = cookie.getValue();
+                    long expiration  = authUtil.getRemainingExpirationTime(accessToken);
+                    tokenBlacklistService.blacklistToken(accessToken, expiration);
+                    Cookie deleteCookie = new Cookie("accessToken", "");
+                    deleteCookie.setValue("");
+                    deleteCookie.setPath("/");
+                    deleteCookie.setMaxAge(0);
+                    // above two properties set to delete the cookie, not std way like delete to delete cookie
+                    // when browser sees these fields as "/", 0 it deletes the accessToken Cookie.
+                    // with the given name (accessToken)
+                    response.addCookie(deleteCookie);
+                }
+            }
+        }
+        return ResponseEntity.ok("Logged out successfully");
+    }
+
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<CurrentUserResponseDto> getCurrentUser() {
