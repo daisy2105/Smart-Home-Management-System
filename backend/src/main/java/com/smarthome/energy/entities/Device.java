@@ -34,7 +34,7 @@ public class Device {
 
     @Column(nullable = false)
     private BigDecimal powerRating;     //hibernate automatically maps to power_rating. so we must follow java naming Convention.
-                       // in kW
+                       // in Watts
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private DeviceStatus status;

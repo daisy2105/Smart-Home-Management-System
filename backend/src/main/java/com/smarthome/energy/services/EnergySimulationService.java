@@ -6,6 +6,7 @@ import com.smarthome.energy.model.DeviceStatus;
 import com.smarthome.energy.model.DeviceType;
 import com.smarthome.energy.repositories.DeviceRepository;
 import com.smarthome.energy.repositories.UsageLogRepository;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,6 +29,9 @@ public class EnergySimulationService {
 
     //Constants
     private static final BigDecimal ONE_MINUTE_IN_HOURS = new BigDecimal("0.016666667");
+    // since we can simulate energy consumption one_minute_in_hours (1 min)
+
+    private static final BigDecimal ONE_HOUR = BigDecimal.ONE;
 
     private static final BigDecimal BASE_RATE = new BigDecimal("7.0");    // 7rs per kwh energy
 
@@ -129,21 +133,28 @@ public class EnergySimulationService {
         return BigDecimal.ONE;
     }
 
-    // since we are simulating energy consumption one_minute_in_hours (1 min)
-    @Scheduled(fixedRate = 60000)   //fixedRate in milliseconds, therefore 60 secs
+    // simulating per hour energy consumption.
+    @Scheduled(fixedRate = 3600000)   //fixedRate in milliseconds, therefore 1 hour
     @Transactional
-    public void simulateEnergyUsage(){
-        List<Device> deviceList = deviceRepository.findAll();
+    public void simulateEnergyUsage(){  // used by spring scheduler so can't make private
 
-        LocalDateTime now = LocalDateTime.now();
-        int hour = now.getHour();
-        Month currentMonth = now.getMonth();
-        boolean isWeekend = now.getDayOfWeek() == DayOfWeek.SATURDAY || now.getDayOfWeek() == DayOfWeek.SUNDAY;
+        simulateEnergyForAnyTime(LocalDateTime.now());  // for current time
+    }
+
+    private void simulateEnergyForAnyTime(LocalDateTime time){
+        List<Device> deviceList = deviceRepository.findByStatus(DeviceStatus.ON);
+
+
+        int hour = time.getHour();
+        Month currentMonth = time.getMonth();
+        boolean isWeekend = time.getDayOfWeek() == DayOfWeek.SATURDAY || time.getDayOfWeek() == DayOfWeek.SUNDAY;
 
         for(Device device: deviceList){
-            if(device.getStatus()!=DeviceStatus.ON)continue;
 
-            BigDecimal baseEnergy = device.getPowerRating().multiply(ONE_MINUTE_IN_HOURS);
+            BigDecimal baseEnergy = device.getPowerRating()
+                    .multiply(ONE_HOUR)
+                    .divide(new BigDecimal("1000"), 6, RoundingMode.HALF_UP);
+            // we generally give power in watts, not KW.
 
             BigDecimal deviceFactor = getDeviceBehaviorFactor(device.getType(), hour);
 
@@ -166,15 +177,31 @@ public class EnergySimulationService {
 
             UsageLog usageLog = UsageLog.builder()
                     .device(device)
-                    .timestamp(now)
+                    .timestamp(time)
                     .energyUsed(finalEnergy)
                     .cost(cost)
                     .build();
 
             usageLogRepository.save(usageLog);
         }
-
     }
 
+    private void generateHistoricalLastYearData(){
+        LocalDateTime start = LocalDateTime.now().minusYears(1);
+        for(int i =0; i<24*365; i++){
+            simulateEnergyForAnyTime(start.plusHours(i));
+        }
+    }
 
+    @PostConstruct
+    public void loadHistoricalData() { // public just for convention.
+        // public tells that this method is part of bean lifecycle, not just the private member of class.
+        if (usageLogRepository.count() == 0) {
+            System.out.println("Generating 1 year historical energy data...");
+            generateHistoricalLastYearData();
+            System.out.println("Historical data generation completed.");
+            // generating data takes time.
+        }
+
+    }
 }
