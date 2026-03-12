@@ -1,19 +1,16 @@
 import React, { useContext } from "react";
 import { Navigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext.jsx";
+import Loading from "../components/UI/Loading.jsx"
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { UserDetail, authLoading, SignUpUser } = useContext(UserContext);    //In SignUpUser store user detail which store in create Account page
+  const { UserDetail, authLoading } = useContext(UserContext);
 
   if (authLoading) {                      // When User do refresh page the loading show then show dashboard
-    return (
-      <div className="h-screen flex bg-white justify-center items-center">
-        <h1 className="text-black">Loading...</h1>
-      </div>
-    );
+    return <Loading loading={true} />
   }
 
-  const Role = UserDetail?.role || SignUpUser?.role   // Used Store UserDetail For Checking is User Valid or Invalid based on user Role 
+  const Role = UserDetail?.role   // Used Store UserDetail For Checking is User Valid or Invalid based on user Role 
   
   if (!Role) {                           // Not logged in
     return <Navigate to="/login" replace />;

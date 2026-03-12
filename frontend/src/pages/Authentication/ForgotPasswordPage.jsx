@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, Navigate } from "react";
 import { forgotPassword} from "../../service/authService"
 import logo from "../../assets/logo.png";
-import Lottie from "lottie-react";
-import toast, { Toaster } from "react-hot-toast";
-import Loading from '../../assets/animation/loading.json';
-import animationData from "../../assets/animation/DataPrivacy.json";
+import toast from "react-hot-toast";
+import Loading from '../../components/UI/Loading';
+import BackButton from "../../components/Button/BackButton";
+import NotificationToaster from "../../components/UI/NotificationToaster";
+import SecurityAnimation from "../../components/UI/SecurityAnimation";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
@@ -15,11 +16,11 @@ const ForgotPasswordPage = () => {
     setLoading(true);                                      // Start loading animation
 
     try {
-      const response = await forgotPassword({ email });
+      const response = await forgotPassword({ email });     // Send email to backend 
       toast.success("Reset Password Mail sent successfully! Please check your email.");
     } catch (error) {
       if (error.response?.status === 404) {
-        toast.error("Email not found. Please check and try again.");
+        toast.error("If an account exists, reset email has been sent.");
       } else {
         toast.error("Something went wrong. Try again later.");
       }
@@ -30,17 +31,9 @@ const ForgotPasswordPage = () => {
 
   return (
     <>
-    {/* Loading animation */}
-      {loading && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50">
-          <div className="w-70">
-            <Lottie
-              animationData={Loading}   
-              loop={true}
-            />
-          </div>
-        </div>
-      )}
+      {/* Loading animation */}
+      <Loading loading={loading}/>
+
       <section className="min-h-screen flex flex-col md:flex-row">
 
       {/* LEFT SIDE */}
@@ -52,14 +45,8 @@ const ForgotPasswordPage = () => {
           <h1 className="text-xl md:text-2xl font-bold">Smart Home</h1>
         </div>
 
-        {/* Animation */}
-        <div className="hidden lg:flex justify-center items-center my-10">
-          <Lottie
-            animationData={animationData}
-            loop={true}
-            className="w-64 md:w-96"
-          />
-        </div>
+        {/* Left Side Lottie Animation */}
+        <SecurityAnimation/>
 
         {/* Text */}
         <div className="space-y-4">
@@ -78,18 +65,10 @@ const ForgotPasswordPage = () => {
         <div className="w-full max-w-xl">
 
           {/* Notification Toaster */}
-          <Toaster position="top-right" containerStyle={{
-            top: "5%", 
-            right: "15%",
-            }}/>
+          <NotificationToaster/>
 
           {/* Back Button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="mb-8 text-blue-600 font-medium hover:underline flex items-center gap-2"
-          >
-            ← Back
-          </button>
+          <BackButton/>
 
           <h2 className="text-3xl font-bold text-gray-800 mb-3">
             Forgot Password
@@ -118,6 +97,7 @@ const ForgotPasswordPage = () => {
 
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl text-lg font-semibold transition duration-300"
             >
               Send Reset Mail

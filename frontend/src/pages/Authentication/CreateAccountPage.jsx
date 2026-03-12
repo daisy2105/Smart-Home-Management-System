@@ -1,48 +1,70 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/UserContext.jsx";
-import toast, { Toaster } from "react-hot-toast";
-import { createAccount } from "../../service/authService.js";
+import toast from "react-hot-toast";
+import { createAccount, getUserDetail } from "../../service/authService.js";
 import logo from "../../assets/logo.png";
-import Lottie from "lottie-react";
 import { Eye, EyeOff } from "lucide-react";
-import animationData from "../../assets/animation/DataPrivacy.json";
-import Loading from '../../assets/animation/loading.json';
+import Loading from '../../components/UI/Loading.jsx';
+import NotificationToaster from "../../components/UI/NotificationToaster.jsx";
+import SecurityAnimation from "../../components/UI/SecurityAnimation.jsx";
+import BackButton from "../../components/Button/BackButton.jsx";
 
 const CreateAccountPage = () => {
   const navigate = useNavigate();
+
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const { SignUpUser, setUserDetail } = useContext(UserContext);
   const [loading, setLoading] = useState(false);                //Loading animation state
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);      // Show Password State
+
+  const UserEmail = sessionStorage.getItem("Email")             // Get Email From Session Storage 
+  const emailValue = SignUpUser?.UserEmail || UserEmail;        // If Context Refresh then get Email from Session Storage
 
   useEffect(() => {
-  toast.success("OTP verified Successfully ");              //Show Notification if OTP is correct 
+    const verified = sessionStorage.getItem("otpVerified");     // Get Email From Session Storage
+
+    if (verified) {
+      toast.success("OTP verified successfully!");
+      sessionStorage.removeItem("otpVerified");               // Remove Stored OTP Status (True or False value only Present in Storage)
+    }
+  }, []);
+
+  useEffect(() => {                                         // Protect route: redirect to signup if email is not available 
+    if (!emailValue) {
+      navigate("/signup", { replace: true });
+    }
   }, []);
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    setLoading(true);                                        // Start loading animation
+    const cleanPassword = password.trim();                  // Remove Extra Spaces of password
+    
+    if (cleanPassword.length < 8) {                         // Check Password length Must be 8 char
+      toast.error("Password must be at least 8 characters with special and numeric character");
+      return;
+    }
 
+    setLoading(true);                                        // Start loading animation
     try {
       const response = await createAccount({            // Send email, name, password, and role to backend for account creation
-        email:SignUpUser?.UserEmail,              // Getting User Email from UserContext 
+        email: emailValue,       
         name,
-        password,
+        password: cleanPassword,
         role,
       });
 
-      setUserDetail(response)                 // Add User response in context for Future use
-      navigate("/dashboard");
+      const userData = await getUserDetail()      // Get UserDetails from DB through backend and store in Context 
+      setUserDetail(userData)                    // Add User Data in context for Future use
+      sessionStorage.removeItem("Email");
+      navigate("/dashboard", { replace: true });
       
     } catch (error) {
       if (error.response?.status === 400) {
-        toast.error("Invalid data provided");
-      } /* else if(error.response?.status === 409){
-        toast.error("Email Already Exists")
-      }*/ else {
+        toast.error("Password must be at least 8 characters with special and numeric character");
+      } else {
         toast.error("Something went wrong. Try again later.");
       }
       } finally {
@@ -53,16 +75,7 @@ const CreateAccountPage = () => {
   return (
     <>
     {/* Loading animation */}
-      {loading && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50">
-          <div className="w-70">
-            <Lottie
-              animationData={Loading}   
-              loop={true}
-            />
-          </div>
-        </div>
-      )}
+      <Loading loading={loading}/>
 
       <section className="h-screen flex flex-col md:flex-row">
 
@@ -74,13 +87,8 @@ const CreateAccountPage = () => {
           <h1 className="text-xl md:text-2xl font-bold">Smart Home</h1>
         </div>
 
-        <div className="hidden lg:flex justify-center items-center my-10">
-          <Lottie
-            animationData={animationData}
-            loop
-            className="w-64 md:w-96"
-          />
-        </div>
+        {/* Left Side Loitte Animation */}
+        <SecurityAnimation/>
 
         <div className="space-y-4">
           <h2 className="text-3xl md:text-5xl font-bold leading-tight">
@@ -98,18 +106,10 @@ const CreateAccountPage = () => {
         <div className="w-full max-w-xl">
 
           {/* Notification Toaster */}
-          <Toaster position="top-right" containerStyle={{
-            top: "5%", 
-            right: "15%",
-            }}/>
+          <NotificationToaster/>
 
           {/* Back Button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="mb-8 text-blue-600 font-medium hover:underline flex items-center gap-2"
-          >
-            ← Back
-          </button>
+          <BackButton/>
 
           <h2 className="text-3xl font-bold text-gray-800 mb-3">
             Create Account
@@ -128,7 +128,7 @@ const CreateAccountPage = () => {
               </label>
               <input
                 type="email"
-                value={SignUpUser?.UserEmail}
+                value={emailValue || ""}
                 readOnly
                 className="w-full px-5 py-4 text-lg rounded-xl border border-gray-300 bg-gray-100"
               />
@@ -164,7 +164,7 @@ const CreateAccountPage = () => {
               />
               <span
                 className="absolute right-4 top-12  cursor-pointer text-gray-400"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowPassword(!showPassword)}                          // Show Password and Hide Password
               >
                 {showPassword ? <EyeOff size={25} /> : <Eye size={25} />}
               </span>
@@ -198,6 +198,7 @@ const CreateAccountPage = () => {
             {/* Submit Button */}
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl text-lg font-semibold transition duration-300"
             >
               Create Account

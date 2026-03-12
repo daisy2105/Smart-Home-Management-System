@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { resetPassword } from "../../service/authService.js";
-import { useNavigate } from "react-router-dom";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import logo from "../../assets/logo.png";
-import Lottie from "lottie-react";
 import { Eye, EyeOff } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
-import animationData from "../../assets/animation/DataPrivacy.json";
-import Loading from '../../assets/animation/loading.json';
+import toast from "react-hot-toast";
+import Loading from '../../components/UI/Loading.jsx';
+import SecurityAnimation from "../../components/UI/SecurityAnimation.jsx";
+import NotificationToaster from "../../components/UI/NotificationToaster.jsx";
+import BackButton from "../../components/Button/BackButton.jsx";
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
@@ -18,45 +18,44 @@ const ResetPasswordPage = () => {
   const [loading, setLoading] = useState(false);          //Loading animation state
   const token = searchParams.get("token");                // Get token from URL query parameters
 
+  useEffect(() => {
+  if (!token) {                                           // If Token isn't present then send back user to login page
+    toast.error("Invalid or expired reset link.");
+    navigate("/login", { replace: true });
+    }
+  }, [token, navigate]);
+
   const submitHandler = async (e) => {
     e.preventDefault();
-    setLoading(true);                                      // Start loading animation
-
+    
     if (!newPassword || !confirmPassword) {               // Frontend validation password and confirm password should not be empty
       toast.error("Please fill all fields.");
       return;
     }
-
-    if (newPassword !== confirmPassword) {
+    
+    if (newPassword !== confirmPassword) {              // Check is password matc to confirm password or not
       toast.error("Passwords do not match.");
       return;
     }
-
+    
+    setLoading(true);                                      // Start loading animation
+    
     try {
       const response = await resetPassword({token, newPassword});           //send token and new password to backend
       toast.success("Password reset successful! Please log in with your new password.");
 
-      navigate("/login");                       // redirect after success
+      navigate("/login", { replace: true });               // redirect after success
     } catch (error) {
-      toast.error("Failed to reset password. Please try again.");
+        toast.error("Password must be at least 8 characters with special and numeric character");
     } finally {
-      setLoading(false);             // Stop loading animation
+      setLoading(false);                                    // Stop loading animation
     }
   };
 
   return (
     <>
-    {/* Loading animation */}
-      {loading && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50">
-          <div className="w-70">
-            <Lottie
-              animationData={Loading}   
-              loop={true}
-            />
-          </div>
-        </div>
-      )}
+      {/* Loading animation */}
+      <Loading loading={loading}/>
 
       <section className="min-h-screen flex flex-col md:flex-row">
 
@@ -69,14 +68,8 @@ const ResetPasswordPage = () => {
           <h1 className="text-xl md:text-2xl font-bold">Smart Home</h1>
         </div>
 
-        {/* Animation */}
-        <div className="hidden lg:flex justify-center items-center my-10">
-          <Lottie
-            animationData={animationData}
-            loop={true}
-            className="w-64 md:w-96"
-          />
-        </div>
+        {/* Left Side Lottie Animation */}
+        <SecurityAnimation/>
 
         {/* Text */}
         <div className="space-y-4">
@@ -95,18 +88,10 @@ const ResetPasswordPage = () => {
         <div className="w-full max-w-xl">
 
           {/* Notification Toaster */}
-          <Toaster position="top-right" containerStyle={{
-            top: "5%", 
-            right: "15%",
-            }}/>
+          <NotificationToaster/>
 
           {/* Back Button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="mb-8 text-blue-600 font-medium hover:underline flex items-center gap-2"
-          >
-            ← Back
-          </button>
+          <BackButton/>
 
           <h2 className="text-3xl font-bold text-gray-800 mb-3">
             Reset Password
@@ -144,7 +129,7 @@ const ResetPasswordPage = () => {
               />
               <span
                 className="absolute right-4 top-12  cursor-pointer text-gray-400"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowPassword(!showPassword)}                // Show Password and Hide Password
               >
                 {showPassword ? <EyeOff size={25} /> : <Eye size={25} />}
               </span>
@@ -152,6 +137,7 @@ const ResetPasswordPage = () => {
 
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl text-lg font-semibold transition duration-300"
             >
               Reset Password

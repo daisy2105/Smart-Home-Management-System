@@ -3,35 +3,59 @@ import { UserContext } from "../../context/UserContext.jsx";
 import { useNavigate } from "react-router-dom";
 import { verifyOtp } from "../../service/authService.js";
 import logo from "../../assets/logo.png";
-import Lottie from "lottie-react";
-import toast, { Toaster } from "react-hot-toast";
-import Loading from '../../assets/animation/loading.json'; 
-import animationData from "../../assets/animation/DataPrivacy.json";
+import toast from "react-hot-toast";
+import Loading from '../../components/UI/Loading.jsx'; 
+import NotificationToaster from "../../components/UI/NotificationToaster.jsx";
+import SecurityAnimation from "../../components/UI/SecurityAnimation.jsx";
+import BackButton from "../../components/Button/BackButton.jsx";
 
 const VerificationPage = () => {
   const [otp, setOtp] = useState("");
-  const [loading, setLoading] = useState(false);          //Loading animation state
-  const { SignUpUser } = useContext(UserContext);      // Access email from context
+  const [loading, setLoading] = useState(false);          // Loading animation state
+  const { SignUpUser } = useContext(UserContext);         // Access email from context
   const navigate = useNavigate();
+
+  const UserEmail = sessionStorage.getItem("Email")       // Get Email in session storage
+  const emailValue = SignUpUser?.UserEmail || UserEmail;
   
   useEffect(() => {
-    toast.success("OTP sent successfully!");       //Show Notification if OTP is sent successfully
+    const otpSent = sessionStorage.getItem("otpSent");    // Read stored OTP status to control notification display
+
+    if (otpSent) {
+      toast.success("OTP sent successfully!");
+      sessionStorage.removeItem("otpSent");              // Remove Stored OTP Status (True or False value only Present in Storage)
+    }
   }, []);
+
+  useEffect(() => {                                     // Protect route: redirect to signup if email is not available            
+    if (!emailValue) {
+      navigate("/signup", { replace: true });
+    }
+  }, [emailValue, navigate]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    setLoading(true);                                      // Start loading animation
+    const cleanOtp = otp.trim()                       // Remove Extra Spaces 
+
+    if (cleanOtp.length !== 6) {                      // Check length Of OTP
+      toast.error("OTP must be 6 digits");
+      return;
+    }
+
+    setLoading(true);                                // Start loading animation
 
     try {
       const response = await verifyOtp({
-        email: SignUpUser?.UserEmail,               // Used User Email Through the Context
-        otp
+        email: emailValue,                            // Used User Email Through the Context
+        otp: cleanOtp
       });
+
+      sessionStorage.setItem("otpVerified", "true");    // Save email and OTP status to handle notification after page refresh/navigation
       navigate("/createaccount");                       // Redirect to create account page
     } catch (error) {
       if (error.response?.status === 400) {             // Check if backend returns 401 for incorrect OTP
         toast.error("Incorrect OTP. Please try again.");
-      } else if(error.response?.status === 401){
+      } else if(error.response?.status === 401){        // Check if OTP is expired or not
         toast.error("OTP Expired. Plase verify Email Again")
       }else {
         toast.error("Something went wrong. Try again later.");
@@ -44,17 +68,9 @@ const VerificationPage = () => {
 
   return (
     <>
-    {/* Loading animation */}
-      {loading && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50">
-          <div className="w-70">
-            <Lottie
-              animationData={Loading}   
-              loop={true}
-            />
-          </div>
-        </div>
-      )}
+      {/* Loading animation */}
+      <Loading loading={loading}/>
+
       <section className="min-h-screen flex flex-col md:flex-row">
 
       {/* LEFT SIDE */}
@@ -66,14 +82,8 @@ const VerificationPage = () => {
           <h1 className="text-xl md:text-2xl font-bold">Smart Home</h1>
         </div>
 
-        {/* Animation */}
-        <div className="hidden lg:flex justify-center items-center my-10">
-          <Lottie
-            animationData={animationData}
-            loop={true}
-            className="w-64 md:w-96"
-          />
-        </div>
+        {/* Left Side Lottie Animation */}
+        <SecurityAnimation/>
 
         {/* Text */}
         <div className="space-y-4">
@@ -92,18 +102,10 @@ const VerificationPage = () => {
         <div className="w-full max-w-xl">
 
           {/* Notification Toaster */}
-          <Toaster position="top-right" containerStyle={{
-            top: "5%", 
-            right: "15%",
-            }}/>
+          <NotificationToaster/>
 
           {/* Back Button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="mb-8 text-blue-600 font-medium hover:underline flex items-center gap-2"
-          >
-            ← Back
-          </button>
+          <BackButton/>
 
           <h2 className="text-3xl font-bold text-gray-800 mb-3">
             Verify OTP
@@ -122,7 +124,7 @@ const VerificationPage = () => {
               </label>
               <input
                 type="email"
-                value={SignUpUser?.UserEmail}     //User Email from session storage
+                value={emailValue || ""}     //User Email from session storage
                 readOnly
                 className="w-full px-5 py-4 text-lg rounded-xl border border-gray-300 bg-gray-100"
               />
@@ -135,6 +137,8 @@ const VerificationPage = () => {
               </label>
               <input
                 type="text"
+                inputMode="numeric"
+                maxLength={6}
                 placeholder="Enter 6-digit OTP"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
@@ -145,6 +149,7 @@ const VerificationPage = () => {
 
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl text-lg font-semibold transition duration-300"
             >
               Verify OTP
