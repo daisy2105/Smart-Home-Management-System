@@ -2,12 +2,13 @@ import React, { useState, useContext, useEffect } from "react";
 import { getUserDetail, Login } from "../../service/authService.js";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
-import Lottie from "lottie-react";
 import { Eye, EyeOff } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
-import animationData from "../../assets/animation/DataPrivacy.json";
-import Loading from '../../assets/animation/loading.json';
+import toast from "react-hot-toast";
+import Loading from '../../components/UI/Loading.jsx';
 import { UserContext } from "../../context/UserContext.jsx";
+import SecurityAnimation from "../../components/UI/SecurityAnimation.jsx";
+import BackButton from "../../components/Button/BackButton.jsx";
+import NotificationToaster from "../../components/UI/NotificationToaster.jsx";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -17,8 +18,8 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  const Role = UserDetail?.role         //Used Context for getting role of user which is got from backend 
-  useEffect(() => {                 // Redirect if already logged in
+  const Role = UserDetail?.role         // Used Context for getting role of user which is got from backend 
+  useEffect(() => {                     // Redirect if already logged in
     if (Role) { 
       navigate("/dashboard");
     }
@@ -30,36 +31,29 @@ const LoginPage = () => {
 
     try {
       const response = await Login({              //sending data to backend for checking user is valid or not 
-        email,
-        password,
+        email: email.trim(),
+        password: password.trim(),
       });
 
-      const user = await getUserDetail();         //getting User Details from DB through Backend
-      setUserDetail(user)
+      const user = await getUserDetail();         //  getting User Details from DB through Backend
+      setUserDetail(user)                         // Store User Data in context 
 
-      navigate("/dashboard");                   //Navigate user to role based dashboard
+      navigate("/dashboard", { replace: true });                   //Navigate user to role based dashboard
     } catch (error) {
-      if (error.response?.status === 401) {                 //  Check if backend returns 401
+      if (error.response?.status === 400) {                 //  Check if backend returns 401
         toast.error("Email or password is incorrect.");
       } else {
         toast.error("Something went wrong. Try again later.");
       }
+    } finally {
+      setLoading(false);
     }
-};
+  };
 
   return (
     <>
-    {/* Loading animation */}
-      {loading && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50">
-          <div className="w-70">
-            <Lottie
-              animationData={Loading}   
-              loop={true}
-            />
-          </div>
-        </div>
-      )}
+      {/* Loading animation */}
+      <Loading loading={loading}/>
 
       <section className="min-h-screen flex flex-col md:flex-row">
 
@@ -72,14 +66,8 @@ const LoginPage = () => {
           <h1 className="text-xl md:text-2xl font-bold">Smart Home</h1>
         </div>
 
-        {/* Animation */}
-        <div className="hidden lg:flex justify-center items-center my-10">
-          <Lottie
-            animationData={animationData}
-            loop={true}
-            className="w-64 md:w-96"
-          />
-        </div>
+        {/* Left Side Lottie Animation */}
+        <SecurityAnimation/>
 
         {/* Text */}
         <div className="space-y-4">
@@ -98,18 +86,10 @@ const LoginPage = () => {
         <div className="w-full max-w-xl">
 
           {/* Notification Toaster */}
-          <Toaster position="top-right" containerStyle={{
-            top: "5%", 
-            right: "15%",
-            }}/>
+          <NotificationToaster/>
 
           {/* Back Button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="mb-8 text-blue-600 font-medium hover:underline flex items-center gap-2"
-          >
-            ← Back
-          </button>
+          <BackButton/>
 
           <h2 className="text-3xl font-bold text-gray-800 mb-3">
             Login
@@ -151,7 +131,7 @@ const LoginPage = () => {
               />
               <span
                 className="absolute right-4 top-12  cursor-pointer text-gray-400"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowPassword(!showPassword)}                // Show Password and Hide Password
               >
                 {showPassword ? <EyeOff size={25} /> : <Eye size={25} />}
               </span>
@@ -170,6 +150,7 @@ const LoginPage = () => {
 
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl text-lg font-semibold transition duration-300"
             >
               Login
