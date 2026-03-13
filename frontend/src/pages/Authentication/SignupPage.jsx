@@ -1,17 +1,18 @@
 import React, { useState, useContext } from 'react';
-import { sendOtp } from '../../Service/authService.js';
+import { sendOtp } from '../../service/authService.js';
 import { useNavigate } from "react-router-dom";
 import { UserContext } from '../../context/UserContext.jsx';
 import logo from '../../assets/logo.png';
-import Lottie from 'lottie-react';
-import toast, { Toaster } from "react-hot-toast";
-import Loading from '../../assets/animation/loading.json';
-import animationData from '../../assets/animation/DataPrivacy.json';
+import toast from "react-hot-toast";
+import Loading from '../../components/UI/Loading.jsx';
+import SecurityAnimation from '../../components/UI/SecurityAnimation.jsx';
+import NotificationToaster from '../../components/UI/NotificationToaster.jsx';
+import BackButton from '../../components/Button/BackButton.jsx';
 
 const SignupPage = () => {
   const [ email , setEmail] = useState('');
   const [loading, setLoading] = useState(false);          //Loading animation state
-  const { UserDetail, setUserDetail } = useContext(UserContext);      // Access setEmailInput from context
+  const { setUserDetail } = useContext(UserContext);      // Access setEmailInput from context
   const navigate = useNavigate();
 
   const submitHandler = async (e) => {
@@ -19,36 +20,32 @@ const SignupPage = () => {
     setLoading(true);                                      // Start loading animation
 
     try {
-      const response = await sendOtp({ email });
+      const cleanEmail = email.trim().toLowerCase();      // remove extra spaces of the email
+      const response = await sendOtp({ email: cleanEmail });
 
-      setUserDetail({UserEmail:email});           // Store email in context for later use
-      if(UserDetail?.UserEmail === email){
-        toast.error("Email Already Exists. Please Login ")
-      }else{
-        navigate("/verification");      // Redirect to OTP verification page
-      }
+      sessionStorage.setItem("Email",cleanEmail)          // Store email in session storage
+      sessionStorage.setItem("otpSent", "true");          // Save email and OTP status to handle notification after page refresh/navigation
+      setUserDetail({UserEmail:cleanEmail});              // Store email in context for later use
+      
+      navigate("/verification");                // Redirect to OTP verification page
     } catch (error) {
-        toast.error("Something went wrong. Try again later.");
+        if (error.response?.status === 409) {
+          toast.error("Email already exists. Please login.");
+        } else if (error.response?.status === 400) {
+          toast.error("Invalid email address.");
+        } else {
+          toast.error("Something went wrong. Try again later.");
+        }
     }finally {
       setLoading(false);             // Stop loading animation
     }
-
-    setEmail('');
   };
 
   return (
     <>
     {/* Loading animation */}
-      {loading && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50">
-          <div className="w-70">
-            <Lottie
-              animationData={Loading}   
-              loop={true}
-            />
-          </div>
-        </div>
-      )}
+      <Loading loading={loading}/>
+
       <section className="min-h-screen flex flex-col md:flex-row">
 
       {/* LEFT SIDE */}
@@ -60,14 +57,8 @@ const SignupPage = () => {
           <h1 className="text-xl md:text-2xl font-bold">Smart Home</h1>
         </div>
 
-        {/* Animation */}
-        <div className="hidden lg:flex justify-center items-center my-10">
-          <Lottie
-            animationData={animationData}
-            loop={true}
-            className="w-64 md:w-96"
-          />
-        </div>
+        {/*left side lottie Animation */}
+        <SecurityAnimation/>
 
         {/* Text */}
         <div className="space-y-4">
@@ -86,18 +77,10 @@ const SignupPage = () => {
         <div className="w-full max-w-xl">
 
           {/* Notification Toaster */}
-          <Toaster position="top-right" containerStyle={{
-            top: "5%", 
-            right: "15%",
-            }}/>
+          <NotificationToaster/>
 
           {/* Back Button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="mb-8 text-blue-600 font-medium hover:underline flex items-center gap-2"
-          >
-            ← Back
-          </button>
+          <BackButton/>
 
           <h2 className="text-3xl font-bold text-gray-800 mb-3">
             Create Account
@@ -125,17 +108,14 @@ const SignupPage = () => {
 
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl text-lg font-semibold transition duration-300"
             >
               Send OTP
             </button>
-
           </form>
-
         </div>
-
       </div>
-
       </section>
     </>
   );
