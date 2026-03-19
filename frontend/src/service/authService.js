@@ -9,7 +9,10 @@ export const createAccount = async (data) => {
   const response = await AxiosInstance.post("/auth/signup", data);
   return response.data;
 };
-
+export const getUserDetail = async () => {
+  const response = await AxiosInstance.get("/auth/me");
+  return response.data;
+};
 export const sendOtp = async (data) => {
   const response = await AxiosInstance.post("/auth/otp/send", data);
   return response.data;

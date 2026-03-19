@@ -1,5 +1,4 @@
-import React from 'react'
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import LandingPageLayout from '../Layout/LandingPage/LandingPageLayout';
 import AuthenticationPage from '../Layout/AuthenticationPages/AuthenticationPages';
 import SignupPage from '../pages/Authentication/SignupPage';
@@ -13,6 +12,12 @@ import LoginPage from '../pages/Authentication/LoginPage';
 import ResetPasswordPage from '../pages/Authentication/ResetPasswordPage';
 import ForgetPasswordPage from '../pages/Authentication/ForgotPasswordPage';
 import UnauthorizePage from '../pages/UnauthorizePage'
+import HomeOwnerDashboard from '../pages/RoleBasedDashboard/HomeownerDashboard/HomeownerDashboard';
+import AdminDashboard from "../pages/RoleBasedDashboard/AdminDashboard/AdminDashboard";
+import TechnicianDashboard from "../pages/RoleBasedDashboard/TechnicianDashboard/TechnicianDashboard"
+import ProtectedRoute from "./ProctectedRoute"
+import RoleBasedRedirect from "./RoleBasedRedirect"
+import DashboardPage from "../Layout/DashboardPage/DashboardLayout"
 
 const AppRoute = () => {
   return (
@@ -35,23 +40,25 @@ const AppRoute = () => {
         </Route>
 
           {/* Role Based Access */}
-        {/* <Route path="/dashboard" element={
-          <ProtectedRoute allowedRoles={["admin","homeowner","technician"]}>
+        <Route path="/dashboard" element={
+          <ProtectedRoute allowedRoles={["ADMIN","HOMEOWNER","TECHNICIAN"]}>
             <RoleBasedRedirect />
           </ProtectedRoute>
-        }/> */}
+        }/> 
 
           {/* Private Route only Authorize User Can Access Specifice Pages */}
-        {/* <Route path='/homeowner/dashboard' element={<ProtectedRoute allowedRoles={["homeowner"]}><DashboardPage/></ProtectedRoute>}>
+        <Route path='/homeowner/dashboard' element={<ProtectedRoute allowedRoles={["HOMEOWNER"]}><DashboardPage/></ProtectedRoute>}>
             <Route index element={<HomeOwnerDashboard />}/>
         </Route>
-        <Route path='/admin/dashboard' element={<ProtectedRoute allowedRoles={["admin"]}><DashboardPage/></ProtectedRoute>}>
+        <Route path='/admin/dashboard' element={<ProtectedRoute allowedRoles={["ADMIN"]}><DashboardPage/></ProtectedRoute>}>
             <Route index element={<AdminDashboard />}/>
         </Route>
-        <Route path='/technician/dashboard' element={<ProtectedRoute allowedRoles={["technician"]}><DashboardPage/></ProtectedRoute>}>
+        <Route path='/technician/dashboard' element={<ProtectedRoute allowedRoles={["TECHNICIAN"]}><DashboardPage/></ProtectedRoute>}>
             <Route index element={<TechnicianDashboard />}/>
-        </Route> */}
+        </Route> 
+
         <Route path='/unauthorized' element={<UnauthorizePage/>}/>
+        <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
