@@ -21,14 +21,15 @@ import java.util.List;
 public class UsageLogController {
 
     private final UsageLogService usageLogService;
-    @PreAuthorize("hasRole('HOMEOWNER')")
-    @PostMapping("{id}/usage")   // here id is Device id , not logId
-    public ResponseEntity<UsageLogResponseDto> addEnergyUsageLog(@PathVariable Long id,
-                                                      @Valid @RequestBody UsageLogRequestDto usageLogRequestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                usageLogService.logEnergyUsage(id,usageLogRequestDto));
 
-    }
+//    @PreAuthorize("hasRole('HOMEOWNER')")
+//    @PostMapping("{id}/usage")   // here id is Device id , not logId
+//    public ResponseEntity<UsageLogResponseDto> addEnergyUsageLog(@PathVariable Long id,
+//                                                      @Valid @RequestBody UsageLogRequestDto usageLogRequestDto) {
+//        return ResponseEntity.status(HttpStatus.CREATED).body(
+//                usageLogService.logEnergyUsage(id,usageLogRequestDto));
+//
+//    }
     @PreAuthorize("hasRole('HOMEOWNER')")   // here also id is Device id.
     @GetMapping("{id}/usage")    //Get should not have request body (REST principle)
     public ResponseEntity<List<UsageLogResponseDto>> getEnergyUsageLog(@PathVariable Long id,
