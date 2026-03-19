@@ -18,6 +18,7 @@ import TechnicianDashboard from "../pages/RoleBasedDashboard/TechnicianDashboard
 import ProtectedRoute from "./ProctectedRoute"
 import RoleBasedRedirect from "./RoleBasedRedirect"
 import DashboardPage from "../Layout/DashboardPage/DashboardLayout"
+import ProfilePage from '../pages/Shared/ProfilePage';
 
 const AppRoute = () => {
   return (
@@ -49,12 +50,15 @@ const AppRoute = () => {
           {/* Private Route only Authorize User Can Access Specifice Pages */}
         <Route path='/homeowner/dashboard' element={<ProtectedRoute allowedRoles={["HOMEOWNER"]}><DashboardPage/></ProtectedRoute>}>
             <Route index element={<HomeOwnerDashboard />}/>
+            <Route path="profile" element={<ProfilePage/>}/>
         </Route>
         <Route path='/admin/dashboard' element={<ProtectedRoute allowedRoles={["ADMIN"]}><DashboardPage/></ProtectedRoute>}>
             <Route index element={<AdminDashboard />}/>
+            <Route path="profile" element={<ProfilePage/>}/>
         </Route>
         <Route path='/technician/dashboard' element={<ProtectedRoute allowedRoles={["TECHNICIAN"]}><DashboardPage/></ProtectedRoute>}>
             <Route index element={<TechnicianDashboard />}/>
+            <Route path="profile" element={<ProfilePage/>}/>
         </Route> 
 
         <Route path='/unauthorized' element={<UnauthorizePage/>}/>
