@@ -7,6 +7,7 @@ import com.smarthome.energy.entities.UsageLog;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -66,5 +67,28 @@ ORDER BY HOUR(u.timestamp)
 """)
     List<HourlyConsumptionDto> getHourlyConsumption(Long userId, LocalDate date);
 
+
+    @Query("""
+SELECT coalesce(sum(u.energyUsed),0)
+from UsageLog  u
+where u.userId = :userId
+and date(u.timestamp) = current_date
+""")
+    BigDecimal getTodayEnergyConsumption(Long userId);
+
+
+    @Query("""
+SELECT coalesce(sum(u.energyUsed),0)
+from UsageLog u
+where u.userId= :userId
+and year(u.timestamp) = YEAR(current_date )
+and month(u.timestamp) = MONTH(current_date )
+""")
+    BigDecimal getCurrentMonthEnergyConsumption(Long userId);
+
 }
+
+
+
+
 // year(), month(), day(), hour(), minute(), second,DayOfWeek() are time extract fun form the timestamp.

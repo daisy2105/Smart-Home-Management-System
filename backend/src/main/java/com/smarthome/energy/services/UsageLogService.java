@@ -95,7 +95,7 @@ public class UsageLogService {
                 );
         //above ensures that each user can only see their device only
         if (usageLogs.isEmpty()) {
-            throw new EntityNotFoundException("No logs found for this device or access denied");
+            throw new EntityNotFoundException("No logs found for this device");
         } // this checks if currentUser has that device or not or he is trying to access  another user's device
 
 
@@ -149,6 +149,16 @@ public class UsageLogService {
     public List<HourlyConsumptionDto> getHourlyConsumption(LocalDate date){
         Long userId = getCurrentUser().getId();
         return usageLogRepository.getHourlyConsumption(userId , date);
+    }
+
+    public BigDecimal getTodayEnergyConsumption(){
+        Long userId = getCurrentUser().getId();
+        return usageLogRepository.getTodayEnergyConsumption(userId);
+    }
+
+    public BigDecimal getCurrentMonthEnergyConsumption(){
+        Long userId = getCurrentUser().getId();
+        return usageLogRepository.getCurrentMonthEnergyConsumption(userId);
     }
 
 }

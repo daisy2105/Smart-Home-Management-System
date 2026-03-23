@@ -20,9 +20,10 @@ public class UsageLog {
     private Long id;
 
     @Column(nullable = false)
-    private Long userId;
+    private Long userId;  //snapshot of user
 
-    private String deviceName;
+    private String deviceName;  //snapshot of device
+    //so when the device gets deleted , we can know the ownership and device.
     private DeviceType deviceType;
 
 
