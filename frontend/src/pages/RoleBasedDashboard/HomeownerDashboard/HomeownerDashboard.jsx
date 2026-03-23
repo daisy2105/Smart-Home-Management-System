@@ -3,7 +3,6 @@ import { UserContext } from '../../../context/UserContext'
 import DeviceCard from './DeviceCard/DeviceCard'
 import DeviceForm from '../../../Features/Devices/DeviceForm/DeviceForm'
 import ManageDevice from '../../../Features/Devices/ManageDevice/ManageDevice'
-import DailyEnergyChart from '../../../Features/Energy/DailyEnergyChart'
 
 const HomeownerDashboard = () => {
   const { UserDetail } = useContext(UserContext)
@@ -22,11 +21,6 @@ const HomeownerDashboard = () => {
       {/* DEVICE SUMMARY */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl p-2">
         <DeviceCard />
-      </div>
-
-      {/* ENERGY GRAPH */}
-      <div className="">
-        <DailyEnergyChart/>
       </div>
 
       {/* DEVICE FORM */}
