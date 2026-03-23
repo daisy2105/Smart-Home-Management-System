@@ -1,5 +1,6 @@
 package com.smarthome.energy.entities;
 
+import com.smarthome.energy.model.DeviceType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,13 @@ public class UsageLog {
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    private Long userId;
+
+    private String deviceName;
+    private DeviceType deviceType;
+
 
     @Column(nullable = false)
     private LocalDateTime timestamp;
