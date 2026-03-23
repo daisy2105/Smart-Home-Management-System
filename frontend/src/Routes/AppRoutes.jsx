@@ -19,6 +19,7 @@ import ProtectedRoute from "./ProctectedRoute"
 import RoleBasedRedirect from "./RoleBasedRedirect"
 import DashboardPage from "../Layout/DashboardPage/DashboardLayout"
 import ProfilePage from '../pages/Shared/ProfilePage';
+import MyDevices from "../pages/RoleBasedDashboard/HomeownerDashboard/MyDevices"
 
 const AppRoute = () => {
   return (
@@ -51,6 +52,7 @@ const AppRoute = () => {
         <Route path='/homeowner/dashboard' element={<ProtectedRoute allowedRoles={["HOMEOWNER"]}><DashboardPage/></ProtectedRoute>}>
             <Route index element={<HomeOwnerDashboard />}/>
             <Route path="profile" element={<ProfilePage/>}/>
+            <Route path="mydevices" element={<MyDevices/>}/>
         </Route>
         <Route path='/admin/dashboard' element={<ProtectedRoute allowedRoles={["ADMIN"]}><DashboardPage/></ProtectedRoute>}>
             <Route index element={<AdminDashboard />}/>
