@@ -7,11 +7,16 @@ import java.util.List;
 
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
 public class UsageLogSummaryDto {
-    private List<UsageLogResponseDto> logs;
+    // constructor used by JPQL // since we can only get two fields not the deviceDeleted
+    // from query so can't use Builder and AllArgsCtor.
+    public UsageLogSummaryDto(BigDecimal totalEnergy, BigDecimal totalCost) {
+        this.totalEnergy = totalEnergy != null ? totalEnergy : BigDecimal.ZERO;
+        this.totalCost = totalCost != null ? totalCost : BigDecimal.ZERO;
+    }
+
     private BigDecimal totalEnergy;
     private BigDecimal totalCost;
+    private boolean deviceDeleted;
 }

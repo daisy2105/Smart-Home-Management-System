@@ -73,13 +73,15 @@ public class UsageLogService {
 
     }*/
 
-    public UsageLogSummaryDto getEnergyCostUsageLog(Long id,
-                                                LocalDateTime start,
-                                                LocalDateTime end) {
+    public UsageLogSummaryDto getTotalEnergyCostForDevice(Long id,
+                                                          LocalDateTime start,
+                                                          LocalDateTime end) {
 
         if (start.isAfter(end)) {
             throw new IllegalArgumentException("Start must be before end");
         }
+
+        Long userId = getCurrentUser().getId();
 
         LocalDateTime deletedAt = deviceRepository.findDeletedAtById(id);
 
@@ -87,56 +89,22 @@ public class UsageLogService {
             Device device = deviceRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Device not found"));
 
-            if (!device.getUser().getId().equals(getCurrentUser().getId())) {
+            if (!device.getUser().getId().equals(userId)) {
                 throw new AccessDeniedException("Not your device");
             }
         }
 
         boolean deviceDeleted = deletedAt != null;
 
-        List<UsageLog> usageLogs =
-                usageLogRepository.findByUserIdAndDeviceIdAndTimestampBetween(
-                        getCurrentUser().getId(),
-                        id,
-                        start,
-                        end
+        UsageLogSummaryDto result =
+                usageLogRepository.getTotalEnergyCostForDevice(
+                        userId, id, start, end
                 );
 
-        if (usageLogs.isEmpty()) {
-            return UsageLogSummaryDto.builder()
-                    .logs(List.of())
-                    .totalEnergy(BigDecimal.ZERO)
-                    .totalCost(BigDecimal.ZERO)
-                    .build();
-        }
+        // set deleted flag
+        result.setDeviceDeleted(deviceDeleted);
 
-        List<UsageLogResponseDto> response = new ArrayList<>();
-        BigDecimal totalEnergy = BigDecimal.ZERO;
-        BigDecimal totalCost = BigDecimal.ZERO;
-
-        for (UsageLog usageLog : usageLogs) {
-
-            totalEnergy = totalEnergy.add(usageLog.getEnergyUsed());
-            totalCost = totalCost.add(usageLog.getCost());
-
-            response.add(
-                    UsageLogResponseDto.builder()
-                            .id(usageLog.getId())
-                            .deviceName(usageLog.getDeviceName())
-                            .deviceType(usageLog.getDeviceType())
-                            .deviceDeleted(deviceDeleted)
-                            .timestamp(usageLog.getTimestamp())
-                            .energyUsed(usageLog.getEnergyUsed())
-                            .cost(usageLog.getCost())
-                            .build()
-            );
-        }
-
-        return UsageLogSummaryDto.builder()
-                .logs(response)
-                .totalEnergy(totalEnergy)
-                .totalCost(totalCost)
-                .build();
+        return result;
     }
 
     public CurrentPowerConsumptionDto getCurrentPowerConsumption() {
@@ -205,6 +173,29 @@ public class UsageLogService {
         Long userId = getCurrentUser().getId();
         return usageLogRepository.getCurrentMonthCost(userId);
 
+    }
+    //Aggregate Method
+    public EnergyCostSummaryDto getTotalEnergyAndCost(LocalDateTime start,
+                                                      LocalDateTime end) {
+
+        if (start.isAfter(end)) {
+            throw new IllegalArgumentException("Start must be before end");
+        }
+
+        Long userId = getCurrentUser().getId();
+
+        EnergyCostSummaryDto result =
+                usageLogRepository.getTotalEnergyAndCost(userId, start, end);
+
+        // handle nulls safely
+        if (result.getTotalEnergy() == null) {
+            result.setTotalEnergy(BigDecimal.ZERO);
+        }
+        if (result.getTotalCost() == null) {
+            result.setTotalCost(BigDecimal.ZERO);
+        }
+
+        return result;
     }
 
 }

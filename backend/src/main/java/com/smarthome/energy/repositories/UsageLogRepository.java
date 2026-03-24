@@ -147,5 +147,35 @@ and YEAR(u.timestamp)= :year
 group by year(u.timestamp),month(u.timestamp)
 order by month(u.timestamp)""")
     List<MonthlyCostDto> getMonthlyCost(Long userId, int year);
+
+    //Aggregate Query
+    @Query("""
+SELECT new com.smarthome.energy.dto.EnergyCostSummaryDto(
+    SUM(u.energyUsed),
+    SUM(u.cost)
+)
+FROM UsageLog u
+WHERE u.userId = :userId
+AND u.timestamp BETWEEN :start AND :end
+""")
+    EnergyCostSummaryDto getTotalEnergyAndCost(Long userId,
+                                               LocalDateTime start,
+                                               LocalDateTime end);
+
+    @Query("""
+SELECT new com.smarthome.energy.dto.UsageLogSummaryDto(
+    SUM(u.energyUsed),
+    SUM(u.cost)
+)
+FROM UsageLog u
+WHERE u.userId = :userId
+AND u.deviceId = :deviceId
+AND u.timestamp BETWEEN :start AND :end
+""")
+    UsageLogSummaryDto getTotalEnergyCostForDevice(Long userId,
+                                                   Long deviceId,
+                                                   LocalDateTime start,
+                                                   LocalDateTime end);
+
 }
 // year(), month(), day(), hour(), minute(), second,DayOfWeek() are time extract fun form the timestamp.
