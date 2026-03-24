@@ -73,54 +73,38 @@ public class UsageLogService {
 
     }*/
 
-    public List<UsageLogResponseDto> getEnergyUsageLog(Long id, LocalDateTime start, LocalDateTime end) {
+    public UsageLogSummaryDto getTotalEnergyCostForDevice(Long id,
+                                                          LocalDateTime start,
+                                                          LocalDateTime end) {
+
         if (start.isAfter(end)) {
             throw new IllegalArgumentException("Start must be before end");
         }
+
+        Long userId = getCurrentUser().getId();
+
         LocalDateTime deletedAt = deviceRepository.findDeletedAtById(id);
 
         if (deletedAt == null) {
-            // device is NOT deleted → check if it exists and belongs to user
             Device device = deviceRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Device not found"));
 
-            if (!device.getUser().getId().equals(getCurrentUser().getId())) {
+            if (!device.getUser().getId().equals(userId)) {
                 throw new AccessDeniedException("Not your device");
             }
         }
 
-
         boolean deviceDeleted = deletedAt != null;
 
-
-        List<UsageLog> usageLogs =
-                usageLogRepository.findByUserIdAndDeviceIdAndTimestampBetween(
-                        getCurrentUser().getId(),
-                        id,
-                        start,
-                        end
+        UsageLogSummaryDto result =
+                usageLogRepository.getTotalEnergyCostForDevice(
+                        userId, id, start, end
                 );
-        //above ensures that each user can only see their device only
-        if (usageLogs.isEmpty()) {
-            return List.of(); // return no logs instead of exception (since unnecessary errors)
-        }
 
+        // set deleted flag
+        result.setDeviceDeleted(deviceDeleted);
 
-        List<UsageLogResponseDto> usageLogResponseDtos = new ArrayList<>();
-        for(UsageLog usageLog : usageLogs) {
-            var a = UsageLogResponseDto.builder()
-                    .id(usageLog.getId())
-                    .deviceName(usageLog.getDeviceName())
-                    .deviceType(usageLog.getDeviceType())
-                    .deviceDeleted(deviceDeleted)
-                    .timestamp(usageLog.getTimestamp())
-                    .energyUsed(usageLog.getEnergyUsed())
-                    .cost(usageLog.getCost())
-                    .build();
-            usageLogResponseDtos.add(a);
-        }
-
-        return usageLogResponseDtos;
+        return result;
     }
 
     public CurrentPowerConsumptionDto getCurrentPowerConsumption() {
@@ -163,5 +147,55 @@ public class UsageLogService {
         return usageLogRepository.getCurrentMonthEnergyConsumption(userId);
     }
 
+    //Cost Methods
+    public List<DailyCostDto> getDailyCost(int year,int month){
+        Long userId = getCurrentUser().getId();
+        return usageLogRepository.getDailyCost(userId,year,month);
+    }
+
+    public List<HourlyCostDto> getHourlyCost(LocalDate date){
+        Long userId = getCurrentUser().getId();
+        return usageLogRepository.getHourlyCost(userId,date);
+
+    }
+
+    public List<MonthlyCostDto> getMonthlyCost(int year){
+        Long userId = getCurrentUser().getId();
+        return usageLogRepository.getMonthlyCost(userId, year);
+    }
+
+    public BigDecimal getTodayCost(){
+        Long userId = getCurrentUser().getId();
+        return usageLogRepository.getTodayCost(userId);
+    }
+
+    public BigDecimal getCurrentMonthCost(){
+        Long userId = getCurrentUser().getId();
+        return usageLogRepository.getCurrentMonthCost(userId);
+
+    }
+    //Aggregate Method
+    public EnergyCostSummaryDto getTotalEnergyAndCost(LocalDateTime start,
+                                                      LocalDateTime end) {
+
+        if (start.isAfter(end)) {
+            throw new IllegalArgumentException("Start must be before end");
+        }
+
+        Long userId = getCurrentUser().getId();
+
+        EnergyCostSummaryDto result =
+                usageLogRepository.getTotalEnergyAndCost(userId, start, end);
+
+        // handle nulls safely
+        if (result.getTotalEnergy() == null) {
+            result.setTotalEnergy(BigDecimal.ZERO);
+        }
+        if (result.getTotalCost() == null) {
+            result.setTotalCost(BigDecimal.ZERO);
+        }
+
+        return result;
+    }
 
 }
