@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
 import java.util.Optional;
@@ -35,11 +34,6 @@ where d.user.id = :userId
 and d.status = 'ON'
 """)
     BigDecimal getCurrentPowerConsumption(Long userId);
-
-
-    @Query(value = "SELECT deleted_at FROM devices WHERE id = :id", nativeQuery = true) //to get the soft deleted device
-    LocalDateTime findDeletedAtById(Long id);
-
 
 
 }

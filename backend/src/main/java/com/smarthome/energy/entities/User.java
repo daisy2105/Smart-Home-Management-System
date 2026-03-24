@@ -40,8 +40,7 @@ public class User {
     @Column(columnDefinition = "JSON")
     private DevicePreferences preferences;   //without converter hibernate will not understand the type
 
-    //cascade all deletes all its devices even soft delete and we don't want this.
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Device> devices = new ArrayList<>();
 
 }
