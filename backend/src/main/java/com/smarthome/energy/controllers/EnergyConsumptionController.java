@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -49,19 +48,6 @@ public class EnergyConsumptionController {
     public ResponseEntity<List<MonthlyEnergyConsumptionDto>> getMonthlyConsumption(@PathVariable int year) {
         return ResponseEntity.ok(usageLogService.getMonthlyEnergyConsumption(year));
     }
-
-    @PreAuthorize("hasRole('HOMEOWNER')")
-    @GetMapping("/current-day")
-    public ResponseEntity<BigDecimal> getTodayEnergyConsumption(){
-        return ResponseEntity.ok(usageLogService.getTodayEnergyConsumption());
-    }
-
-    @PreAuthorize("hasRole('HOMEOWNER')")
-    @GetMapping("/current-month")
-    public ResponseEntity<BigDecimal> getCurrentMonthEnergyConsumption(){
-        return ResponseEntity.ok(usageLogService.getCurrentMonthEnergyConsumption());
-    }
-
 
 
 }
