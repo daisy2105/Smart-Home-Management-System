@@ -4,12 +4,10 @@ import com.smarthome.energy.dto.*;
 import com.smarthome.energy.entities.Device;
 import com.smarthome.energy.entities.UsageLog;
 import com.smarthome.energy.entities.User;
-import com.smarthome.energy.model.DeviceStatus;
 import com.smarthome.energy.repositories.DeviceRepository;
 import com.smarthome.energy.repositories.UsageLogRepository;
 import com.smarthome.energy.repositories.JpaUserRepository;
-import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -17,10 +15,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import org.springframework.security.access.AccessDeniedException;
 
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,23 +32,29 @@ public class UsageLogService {
                 .getContext()
                 .getAuthentication()
                 .getName();                    // same as getPrincipal().toString();
-        return userRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("User Not Found"));
+        return userRepository.findByEmail(email).orElseThrow(()-> new EntityNotFoundException("User Not Found"));
     }
 
 
     // user (homeowner should not log the energy usage, it should be iot or simulation generated.
-    @Transactional
+    /*@Transactional
     public UsageLogResponseDto logEnergyUsage(Long id, @Valid UsageLogRequestDto usageLogRequestDto)  {
-        Device device = deviceRepository.findById(id).orElseThrow(()-> new RuntimeException("Device Not Found"));
+        Device device = deviceRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("Device Not Found"));
         if(!device.getUser().getId().equals(getCurrentUser().getId())) {
             throw new AccessDeniedException("You do not have permission to log this device");
         }
+        LocalDateTime deletedAt = deviceRepository.findDeletedAtById(id);
+
+        boolean deviceDeleted = deletedAt != null;
         BigDecimal energyUsed = usageLogRequestDto.getDurationInHours()
                 .multiply(device.getPowerRating())
                 .divide(new BigDecimal("1000"), 6, RoundingMode.HALF_UP);//  since energy in W, not in kW
         BigDecimal cost = energyUsed.multiply(rate);
         UsageLog usageLog = UsageLog.builder()
                 .device(device)
+                .userId(device.getUser().getId())
+                .deviceName(device.getName())
+                .deviceType(device.getType())
                 .cost(cost)
                 .energyUsed(energyUsed)
                 .timestamp(usageLogRequestDto.getTimestamp())
@@ -61,23 +63,56 @@ public class UsageLogService {
         UsageLog usageLogSaved = usageLogRepository.save(usageLog);
         return UsageLogResponseDto.builder()
                 .id(usageLogSaved.getId())
+                .deviceName(usageLog.getDeviceName())
+                .deviceType(usageLog.getDeviceType())
+                .deviceDeleted(deviceDeleted)
                 .timestamp(usageLogSaved.getTimestamp())
                 .energyUsed(usageLogSaved.getEnergyUsed())
                 .cost(usageLogSaved.getCost()).
                 build();
 
-    }
+    }*/
 
     public List<UsageLogResponseDto> getEnergyUsageLog(Long id, LocalDateTime start, LocalDateTime end) {
-        Device device = deviceRepository.findById(id).orElseThrow(()-> new RuntimeException("Device Not Found"));
-        if(!device.getUser().getId().equals(getCurrentUser().getId())) {
-            throw new AccessDeniedException("You do not have permission to log this device");
+        if (start.isAfter(end)) {
+            throw new IllegalArgumentException("Start must be before end");
         }
-        List<UsageLog> usageLogs = usageLogRepository.findByDeviceAndTimestampBetween(device, start, end);
+        LocalDateTime deletedAt = deviceRepository.findDeletedAtById(id);
+
+        if (deletedAt == null) {
+            // device is NOT deleted → check if it exists and belongs to user
+            Device device = deviceRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Device not found"));
+
+            if (!device.getUser().getId().equals(getCurrentUser().getId())) {
+                throw new AccessDeniedException("Not your device");
+            }
+        }
+
+
+        boolean deviceDeleted = deletedAt != null;
+
+
+        List<UsageLog> usageLogs =
+                usageLogRepository.findByUserIdAndDeviceIdAndTimestampBetween(
+                        getCurrentUser().getId(),
+                        id,
+                        start,
+                        end
+                );
+        //above ensures that each user can only see their device only
+        if (usageLogs.isEmpty()) {
+            return List.of(); // return no logs instead of exception (since unnecessary errors)
+        }
+
+
         List<UsageLogResponseDto> usageLogResponseDtos = new ArrayList<>();
         for(UsageLog usageLog : usageLogs) {
             var a = UsageLogResponseDto.builder()
                     .id(usageLog.getId())
+                    .deviceName(usageLog.getDeviceName())
+                    .deviceType(usageLog.getDeviceType())
+                    .deviceDeleted(deviceDeleted)
                     .timestamp(usageLog.getTimestamp())
                     .energyUsed(usageLog.getEnergyUsed())
                     .cost(usageLog.getCost())
@@ -118,5 +153,15 @@ public class UsageLogService {
         Long userId = getCurrentUser().getId();
         return usageLogRepository.getHourlyConsumption(userId , date);
     }
+    public BigDecimal getTodayEnergyConsumption(){
+        Long userId = getCurrentUser().getId();
+        return usageLogRepository.getTodayEnergyConsumption(userId);
+    }
+
+    public BigDecimal getCurrentMonthEnergyConsumption(){
+        Long userId = getCurrentUser().getId();
+        return usageLogRepository.getCurrentMonthEnergyConsumption(userId);
+    }
+
 
 }
