@@ -39,6 +39,7 @@ public class EnergyConsumptionController {
     @PreAuthorize("hasRole('HOMEOWNER')")
     @GetMapping("/daily/{year}/{month}")
     public ResponseEntity<List<DailyEnergyConsumptionDto>> getDailyConsumption(@PathVariable int year, @PathVariable int month) {
+        if (month < 1 || month > 12) throw new IllegalArgumentException("Invalid Month");
         return ResponseEntity.ok(usageLogService.getDailyEnergyConsumption(year, month));
 
     }
@@ -48,6 +49,19 @@ public class EnergyConsumptionController {
     public ResponseEntity<List<MonthlyEnergyConsumptionDto>> getMonthlyConsumption(@PathVariable int year) {
         return ResponseEntity.ok(usageLogService.getMonthlyEnergyConsumption(year));
     }
+
+    @PreAuthorize("hasRole('HOMEOWNER')")
+    @GetMapping("/today")
+    public ResponseEntity<BigDecimal> getTodayEnergyConsumption(){
+        return ResponseEntity.ok(usageLogService.getTodayEnergyConsumption());
+    }
+
+    @PreAuthorize("hasRole('HOMEOWNER')")
+    @GetMapping("/this-month")
+    public ResponseEntity<BigDecimal> getCurrentMonthEnergyConsumption(){
+        return ResponseEntity.ok(usageLogService.getCurrentMonthEnergyConsumption());
+    }
+
 
 
 }
