@@ -73,14 +73,17 @@ public class UsageLogService {
 
     }*/
 
-    public List<UsageLogResponseDto> getEnergyUsageLog(Long id, LocalDateTime start, LocalDateTime end) {
+    public UsageLogSummaryDto getEnergyCostUsageLog(Long id,
+                                                LocalDateTime start,
+                                                LocalDateTime end) {
+
         if (start.isAfter(end)) {
             throw new IllegalArgumentException("Start must be before end");
         }
+
         LocalDateTime deletedAt = deviceRepository.findDeletedAtById(id);
 
         if (deletedAt == null) {
-            // device is NOT deleted → check if it exists and belongs to user
             Device device = deviceRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Device not found"));
 
@@ -89,9 +92,7 @@ public class UsageLogService {
             }
         }
 
-
         boolean deviceDeleted = deletedAt != null;
-
 
         List<UsageLog> usageLogs =
                 usageLogRepository.findByUserIdAndDeviceIdAndTimestampBetween(
@@ -100,27 +101,42 @@ public class UsageLogService {
                         start,
                         end
                 );
-        //above ensures that each user can only see their device only
+
         if (usageLogs.isEmpty()) {
-            return List.of(); // return no logs instead of exception (since unnecessary errors)
-        }
-
-
-        List<UsageLogResponseDto> usageLogResponseDtos = new ArrayList<>();
-        for(UsageLog usageLog : usageLogs) {
-            var a = UsageLogResponseDto.builder()
-                    .id(usageLog.getId())
-                    .deviceName(usageLog.getDeviceName())
-                    .deviceType(usageLog.getDeviceType())
-                    .deviceDeleted(deviceDeleted)
-                    .timestamp(usageLog.getTimestamp())
-                    .energyUsed(usageLog.getEnergyUsed())
-                    .cost(usageLog.getCost())
+            return UsageLogSummaryDto.builder()
+                    .logs(List.of())
+                    .totalEnergy(BigDecimal.ZERO)
+                    .totalCost(BigDecimal.ZERO)
                     .build();
-            usageLogResponseDtos.add(a);
         }
 
-        return usageLogResponseDtos;
+        List<UsageLogResponseDto> response = new ArrayList<>();
+        BigDecimal totalEnergy = BigDecimal.ZERO;
+        BigDecimal totalCost = BigDecimal.ZERO;
+
+        for (UsageLog usageLog : usageLogs) {
+
+            totalEnergy = totalEnergy.add(usageLog.getEnergyUsed());
+            totalCost = totalCost.add(usageLog.getCost());
+
+            response.add(
+                    UsageLogResponseDto.builder()
+                            .id(usageLog.getId())
+                            .deviceName(usageLog.getDeviceName())
+                            .deviceType(usageLog.getDeviceType())
+                            .deviceDeleted(deviceDeleted)
+                            .timestamp(usageLog.getTimestamp())
+                            .energyUsed(usageLog.getEnergyUsed())
+                            .cost(usageLog.getCost())
+                            .build()
+            );
+        }
+
+        return UsageLogSummaryDto.builder()
+                .logs(response)
+                .totalEnergy(totalEnergy)
+                .totalCost(totalCost)
+                .build();
     }
 
     public CurrentPowerConsumptionDto getCurrentPowerConsumption() {
@@ -163,5 +179,32 @@ public class UsageLogService {
         return usageLogRepository.getCurrentMonthEnergyConsumption(userId);
     }
 
+    //Cost Methods
+    public List<DailyCostDto> getDailyCost(int year,int month){
+        Long userId = getCurrentUser().getId();
+        return usageLogRepository.getDailyCost(userId,year,month);
+    }
+
+    public List<HourlyCostDto> getHourlyCost(LocalDate date){
+        Long userId = getCurrentUser().getId();
+        return usageLogRepository.getHourlyCost(userId,date);
+
+    }
+
+    public List<MonthlyCostDto> getMonthlyCost(int year){
+        Long userId = getCurrentUser().getId();
+        return usageLogRepository.getMonthlyCost(userId, year);
+    }
+
+    public BigDecimal getTodayCost(){
+        Long userId = getCurrentUser().getId();
+        return usageLogRepository.getTodayCost(userId);
+    }
+
+    public BigDecimal getCurrentMonthCost(){
+        Long userId = getCurrentUser().getId();
+        return usageLogRepository.getCurrentMonthCost(userId);
+
+    }
 
 }

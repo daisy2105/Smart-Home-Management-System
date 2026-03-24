@@ -84,6 +84,68 @@ and date(u.timestamp) = current_date
 """)
     BigDecimal getTodayEnergyConsumption(Long userId);
 
+    //Cost Queries
+    @Query("""
+SELECT coalesce(sum(u.cost), 0)
+FROM UsageLog u
+WHERE u.userId = :userId
+AND date(u.timestamp) = current_date
+""")
+    BigDecimal getTodayCost(Long userId);
 
+    @Query("""
+SELECT coalesce(sum(u.cost), 0)
+FROM UsageLog u
+WHERE u.userId = :userId
+AND year(u.timestamp) = year(current_date)
+AND month(u.timestamp) = month(current_date)
+""")
+    BigDecimal getCurrentMonthCost(Long userId);
+
+    @Query("""
+select new com.smarthome.energy.dto.HourlyCostDto(
+    year(u.timestamp),
+    month(u.timestamp),
+    day(u.timestamp),
+    hour(u.timestamp),
+    coalesce(sum(u.cost),0)
+)
+from UsageLog u
+where u.userId = :userId
+AND YEAR(u.timestamp) = YEAR(:date)
+AND MONTH(u.timestamp) = MONTH(:date)
+AND DAY(u.timestamp) = DAY(:date)
+GROUP BY YEAR(u.timestamp), MONTH(u.timestamp), DAY(u.timestamp), HOUR(u.timestamp)
+ORDER BY HOUR(u.timestamp)""")
+    List<HourlyCostDto> getHourlyCost(Long userId, LocalDate date);
+
+    @Query("""
+SELECT new com.smarthome.energy.dto.DailyCostDto(
+    YEAR(u.timestamp),
+    MONTH(u.timestamp),
+    DAY(u.timestamp),
+    COALESCE(SUM(u.cost), 0)
+)
+FROM UsageLog u
+WHERE u.userId = :userId
+AND YEAR(u.timestamp) = :year
+AND MONTH(u.timestamp) = :month
+GROUP BY YEAR(u.timestamp), MONTH(u.timestamp), DAY(u.timestamp)
+ORDER BY DAY(u.timestamp)
+""")
+    List<DailyCostDto> getDailyCost(Long userId, int year, int month);
+
+    @Query("""
+select new com.smarthome.energy.dto.MonthlyCostDto(
+year(u.timestamp),
+month(u.timestamp),
+coalesce(sum(u.cost),0)
+)
+from UsageLog  u
+where u.userId= :userId
+and YEAR(u.timestamp)= :year
+group by year(u.timestamp),month(u.timestamp)
+order by month(u.timestamp)""")
+    List<MonthlyCostDto> getMonthlyCost(Long userId, int year);
 }
 // year(), month(), day(), hour(), minute(), second,DayOfWeek() are time extract fun form the timestamp.
