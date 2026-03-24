@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 @Service
@@ -143,7 +144,7 @@ public class EnergySimulationService {
 
     private void simulateEnergyForAnyTime(LocalDateTime time){
         List<Device> deviceList = deviceRepository.findByStatus(DeviceStatus.ON);
-
+        // since this is select query so deleted_at is NULL will also apply on it.
 
         int hour = time.getHour();
         Month currentMonth = time.getMonth();
@@ -162,7 +163,9 @@ public class EnergySimulationService {
             BigDecimal seasonFactor = getSeasonFactor(device.getType(),currentMonth);
             BigDecimal weekendFactor = isWeekend ? new BigDecimal("1.03") : BigDecimal.ONE;
 
-            BigDecimal humanRandomFactor = BigDecimal.valueOf(0.95 + Math.random() * 0.1);
+            BigDecimal humanRandomFactor = BigDecimal.valueOf(
+                    ThreadLocalRandom.current().nextDouble(0.95, 1.05)
+            );
 
             BigDecimal finalEnergy = baseEnergy.multiply(deviceFactor)
                     .multiply(timeOfDay)
@@ -177,6 +180,10 @@ public class EnergySimulationService {
 
             UsageLog usageLog = UsageLog.builder()
                     .device(device)
+                    .deviceId(device.getId())
+                    .userId(device.getUser().getId())
+                    .deviceName(device.getName())
+                    .deviceType(device.getType())
                     .timestamp(time)
                     .energyUsed(finalEnergy)
                     .cost(cost)

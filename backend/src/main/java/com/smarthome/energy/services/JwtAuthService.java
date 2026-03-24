@@ -2,7 +2,6 @@ package com.smarthome.energy.services;
 
 import com.smarthome.energy.dto.AuthJwtResponseDto;
 import com.smarthome.energy.dto.LoginRequestDto;
-import com.smarthome.energy.dto.AuthResponseDto;
 import com.smarthome.energy.dto.SignupRequestDto;
 import com.smarthome.energy.entities.EmailVerified;
 import com.smarthome.energy.entities.User;

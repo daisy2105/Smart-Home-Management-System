@@ -3,7 +3,6 @@ package com.smarthome.energy.controllers;
 import com.smarthome.energy.dto.*;
 import com.smarthome.energy.repositories.JpaUserRepository;
 import com.smarthome.energy.services.JwtAuthService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;

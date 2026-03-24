@@ -3,18 +3,14 @@ package com.smarthome.energy.services;
 import com.smarthome.energy.entities.User;
 import com.smarthome.energy.repositories.JpaUserRepository;
 import com.smarthome.energy.security.AuthUtil;
-import com.smarthome.energy.security.SecurityUser;
 import io.jsonwebtoken.Claims;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
