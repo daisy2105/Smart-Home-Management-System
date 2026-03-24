@@ -1,9 +1,7 @@
 import React from "react";
-import { useTheme } from "../../../context/ThemeContext.jsx";
 import { Zap, Home, Shield } from "lucide-react"; // Lucide icons
 
 const InfoCardsSection = () => {
-  const { darkMode } = useTheme();
 
   const cards = [
     {

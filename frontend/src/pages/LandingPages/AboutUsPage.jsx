@@ -24,7 +24,7 @@ const AboutUsPage = () => {
   ];
 
   return (
-    <section className="py-24 bg-gray-50 dark:bg-black transition-colors duration-300">
+    <section className="min-h-screen py-24 bg-gray-50 dark:bg-black transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 md:px-12 text-center md:text-left">
         <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">
           About Our System

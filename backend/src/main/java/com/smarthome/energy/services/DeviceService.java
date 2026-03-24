@@ -5,7 +5,6 @@ import com.smarthome.energy.entities.Device;
 import com.smarthome.energy.entities.User;
 import com.smarthome.energy.repositories.DeviceRepository;
 import com.smarthome.energy.repositories.JpaUserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -86,7 +85,7 @@ public class DeviceService {
         if(!device.getUser().getId().equals(getCurrentUser().getId())) {
             throw new AccessDeniedException("You do not have permission to delete this device");
         }
-        deviceRepository.delete(device);  //now it will soft delete it since we changed the delete Sql query
+        deviceRepository.delete(device);
 
     }
 
@@ -108,12 +107,7 @@ public class DeviceService {
 
     @Transactional
     public DeviceResponseDto updateDeviceStatus(Long id, @Valid DeviceStatusUpdateRequestDto deviceStatusUpdateRequestDto) {
-        Device device = deviceRepository.findDeviceById(id).orElseThrow(()->new EntityNotFoundException("Device not found"));
-        //findDeviceById won't return the deletedAt!= null devices( ie deleted devices);
-        //can't update a deleted device
-        /*if(device.getDeletedAt()!=null){
-            throw new IllegalStateException("Cannot update Status of deleted device");
-        }*/
+        Device device = deviceRepository.findDeviceById(id).orElseThrow(()->new RuntimeException("Device not found"));
         if(!device.getUser().getId().equals(getCurrentUser().getId())) {
             throw new AccessDeniedException("You do not have permission to update this device");
         }
@@ -131,13 +125,10 @@ public class DeviceService {
 
     @Transactional
     public DeviceResponseDto updateDeviceName(Long id, DeviceNameUpdateRequestDto deviceNameUpdateRequestDto) {
-        Device device = deviceRepository.findDeviceById(id).orElseThrow(()->new EntityNotFoundException("Device not found"));
-        //findDeviceById won't return the deletedAt!= null devices( ie deleted devices);
-
+        Device device = deviceRepository.findDeviceById(id).orElseThrow(()->new RuntimeException("Device not found"));
         if(!device.getUser().getId().equals(getCurrentUser().getId())) {
             throw new AccessDeniedException("You do not have permission to update this device");
         }
-
         device.setName(deviceNameUpdateRequestDto.getName());
         Device updatedDevice = deviceRepository.save(device);
         return DeviceResponseDto.builder()

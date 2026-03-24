@@ -1,5 +1,4 @@
 import React from "react";
-import { useTheme } from "../../context/ThemeContext.jsx";
 import {
   Wifi,
   Thermometer,
@@ -12,7 +11,6 @@ import {
 } from "lucide-react";
 
 const FeaturePage = () => {
-  const { darkMode } = useTheme();
 
   const features = [
     {
@@ -58,7 +56,7 @@ const FeaturePage = () => {
   ];
 
   return (
-    <section className="py-20 bg-gray-100 dark:bg-black transition-colors duration-300">
+    <section className="min-h-screen py-20 bg-gray-100 dark:bg-black transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 md:px-12 text-center">
         <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 dark:text-white mb-12">
           Key Features

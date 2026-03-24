@@ -1,15 +1,21 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
-const ThemeContext = createContext();
+export const ThemeContext = createContext();
 
-export const ThemeProvider = ({ children }) => {
-  const [darkMode, setDarkMode] = useState(false);
+const ThemeProvider = ({ children }) => {
 
-  useEffect(() => {
+  const [darkMode, setDarkMode] = useState(() => {        // Get theme from localStorage on first load
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme === "dark";
+  });
+
+  useEffect(() => {                           // Apply theme and save into localStorage
     if (darkMode) {
       document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     }
   }, [darkMode]);
 
@@ -20,6 +26,4 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
-export const useTheme = () => {
-  return useContext(ThemeContext);
-};
+export default ThemeProvider;
