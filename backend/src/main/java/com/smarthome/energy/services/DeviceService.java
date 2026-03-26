@@ -38,6 +38,18 @@ public class DeviceService {
         }
         return devicesDto;
     }
+    public List<DeviceResponseDto> getMyFaultyDevices(){
+        User currentUser = getCurrentUser();
+        Long userId = currentUser.getId();
+        List<Device> devices = deviceRepository.findDeletedDevicesByUserId(userId);
+        return devices.stream().map(obj->DeviceResponseDto.builder()
+                .id(obj.getId())
+                .name(obj.getName())
+                .type(obj.getType())
+                .status(obj.getStatus())
+                .powerRating(obj.getPowerRating())
+                .build()).toList();
+    }
 
     @Transactional
     public DeviceResponseDto addDevice(@Valid DeviceRequestDto deviceRequestDto) {

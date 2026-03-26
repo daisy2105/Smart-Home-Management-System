@@ -2,7 +2,6 @@ package com.smarthome.energy.services;
 
 import com.smarthome.energy.dto.*;
 import com.smarthome.energy.entities.Device;
-import com.smarthome.energy.entities.UsageLog;
 import com.smarthome.energy.entities.User;
 import com.smarthome.energy.repositories.DeviceRepository;
 import com.smarthome.energy.repositories.UsageLogRepository;
@@ -17,7 +16,6 @@ import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
