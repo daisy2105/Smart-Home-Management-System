@@ -1,5 +1,7 @@
 import React from 'react';
 import MonthlyEnergyChart from '../../../Features/Energy/MonthlyEnergyChart';
+import MonthlyEnergyCost from '../../../Features/Energy/MonthlyEnergyCost';
+import TodayEnergyCost from '../../../Features/Energy/TodayEnergyCost';
 
 const EnergyUsage = () => {
   return (
@@ -17,7 +19,8 @@ const EnergyUsage = () => {
 
       <div className='flex justify-around shadow-md p-4 rounded-xl'>
         <div className='flex flex-col gap-5 mt-12'>
-
+          <MonthlyEnergyCost/>
+          <TodayEnergyCost/>
         </div>
         <MonthlyEnergyChart />
       </div>
