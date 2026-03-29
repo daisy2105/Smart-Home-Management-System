@@ -32,3 +32,7 @@ export const forgotPassword = async (data) => {
   const response = await AxiosInstance.post("/auth/password-forgot", data);
   return response.data;
 };
+export const getHourlyEnergyConsumption = async (date) => {
+  const response = await AxiosInstance.get(`/api/energy/hourly/${date}`);
+  return response.data;
+};
