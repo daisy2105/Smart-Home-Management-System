@@ -1,7 +1,7 @@
 import React from 'react';
 import MonthlyEnergyChart from '../../../Features/Energy/MonthlyEnergyChart';
-import MonthlyEnergyCost from '../../../Features/Energy/MonthlyEnergyCost';
-import TodayEnergyCost from '../../../Features/Energy/TodayEnergyCost';
+import MonthlyEnergyCost from '../../../Features/EnergyCost/MonthlyEnergyCost';
+import TodayEnergyCost from '../../../Features/EnergyCost/TodayEnergyCost';
 
 const EnergyUsage = () => {
   return (
