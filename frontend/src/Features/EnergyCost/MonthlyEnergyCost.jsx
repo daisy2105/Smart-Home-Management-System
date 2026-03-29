@@ -3,8 +3,8 @@ import { EnergyContext } from "../../context/EnergyContext";
 import { CreditCard } from "lucide-react";
 
 const EnergyCost = ({ width = "300px", height = "150px" }) => {
-  const { monthCost } = useContext(EnergyContext);
-  const totalCost = monthCost ?? 0;
+  const { monthlyCost } = useContext(EnergyContext);
+  const totalCost = monthlyCost ?? 0;
 
   return (
     <div
