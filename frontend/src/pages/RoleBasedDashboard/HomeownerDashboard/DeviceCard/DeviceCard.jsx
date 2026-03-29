@@ -39,14 +39,14 @@ const DeviceCard = () => {
     {
       title: "Today's Usage",                         // Today's energy consumption (from context)
       value: todayEnergy, 
-      unit: "kWh",
+      unit: "kW",
       color: "from-purple-500 to-purple-600",
       icon: <Calendar size={24} className="mr-2" />,
     },
     {
       title: "Monthly Usage",                          // Current month energy consumption
       value: monthlyEnergy, 
-      unit: "kWh",
+      unit: "kW",
       color: "from-yellow-400 to-yellow-500",
       icon: <Layers size={24} className="mr-2" />,
     },

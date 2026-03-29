@@ -57,7 +57,7 @@ const ManageDevice = () => {
                   <td className="py-2 px-2 sm:px-4 truncate">{device.name}</td>
                   <td className="py-2 px-2 sm:px-4 truncate">{device.type}</td>
                   <td className="py-2 px-2 sm:px-4 truncate">
-                    {device.powerRating} kWh
+                    {device.powerRating} W
                   </td>
 
                   {/* STATUS */}

@@ -93,7 +93,7 @@ const DeviceForm = () => {
             type="number"
             value={devicePowerRating}
             onChange={(e) => setDevicePowerRating(e.target.value)}
-            placeholder="Power (kWh)"
+            placeholder="Power (W)"
             required
             className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition dark:bg-gray-800 dark:border-gray-700 dark:text-white"
           />
