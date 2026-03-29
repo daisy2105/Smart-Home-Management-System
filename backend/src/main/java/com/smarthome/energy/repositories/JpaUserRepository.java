@@ -5,6 +5,7 @@ import com.smarthome.energy.entities.User;
 import com.smarthome.energy.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface JpaUserRepository extends JpaRepository<User, Long> {
@@ -12,4 +13,6 @@ public interface JpaUserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     boolean existsByRole(Role role);
+    long countByRole(Role role);
+    List<User> findByRole(Role role);
 }

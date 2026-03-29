@@ -19,6 +19,11 @@ public interface UsageLogRepository extends JpaRepository<UsageLog, Long> {
             LocalDateTime start,
             LocalDateTime end
     );
+    @Query("SELECT COALESCE(SUM(u.energyUsed), 0) FROM UsageLog u")
+    BigDecimal sumEnergyUsed();
+
+    @Query("select coalesce(sum(u.cost),0)from UsageLog u")
+    BigDecimal totalCost();
 
     //Energy Consumption Queries
 

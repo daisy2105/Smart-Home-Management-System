@@ -22,6 +22,12 @@ public class DeviceController {
     public ResponseEntity<List<DeviceResponseDto>> getMyDevices() {
         return ResponseEntity.ok(deviceService.getMyDevices());
     }
+
+    @PreAuthorize("hasRole('HOMEOWNER')")
+    @GetMapping("/faulty")   // getting (read) faulty device
+    public ResponseEntity<List<DeviceResponseDto>> getFaultyDevices() {
+        return ResponseEntity.ok(deviceService.getMyFaultyDevices());
+    }
     @PreAuthorize("hasRole('HOMEOWNER')")
     @PostMapping       // adding (create) device
     public ResponseEntity<DeviceResponseDto> createDevice(@Valid @RequestBody DeviceRequestDto deviceRequestDto) {

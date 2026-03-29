@@ -39,7 +39,22 @@ and d.status = 'ON'
     @Query(value = "SELECT deleted_at FROM devices WHERE id = :id", nativeQuery = true) //to get the soft deleted device
     LocalDateTime findDeletedAtById(Long id);
 
+    @Query(value = "SELECT * FROM devices WHERE id = :id", nativeQuery = true)
+    Optional<Device> findByIdIncludingDeleted(Long id);
 
+    @Query(value = """
+select * from devices where user_id IN (:userIds)
+and deleted_at IS NOT NULL""",nativeQuery = true)
+    List<Device> findDeletedDevicesByUserIds(List<Long> userIds);
+
+    @Query(value = """
+    SELECT * FROM devices 
+    WHERE user_id = :userId 
+    AND deleted_at IS NOT NULL
+""", nativeQuery = true)
+    List<Device> findDeletedDevicesByUserId(Long userId);
+
+    List<Device> findByUserIdInAndDeletedAtIsNull(List<Long> userIds);
 }
 
 
