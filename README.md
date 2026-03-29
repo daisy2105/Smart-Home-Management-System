@@ -52,7 +52,6 @@ The application provides:
 * Manage users
 * Monitor system activity
 * Approve technicians
-* Maintain platform security
 
 ### 🏡 Homeowner
 
@@ -89,6 +88,10 @@ Database (MySQL)
 src/
  ├── components/     # Reusable UI components
  ├── pages/          # Route-level screens
+ ├── feature/        # All Feature Related to Devices and Energy Usge
+      ├── Devices/   # Devices CRUD-Operation
+      ├── Energy/    # Energy Usage Graph (Monthly and Daily)
+      └── EnergyCost/# Energy Cost (Month and Daily Based)
  ├── layouts/        # Shared dashboard layouts
  ├── context/        # Global state management
  ├── services/       # API communication layer
@@ -229,7 +232,6 @@ http://localhost:5173
 * Notification system
 * Advanced analytics dashboard
 * Mobile optimization
-* Dark mode UI
 * Docker deployment
 
 ---
@@ -240,7 +242,7 @@ This project demonstrates:
 
 * Full-stack application design
 * Authentication & authorization workflows
-* Scalable frontend architecture
+* Scalable frontend and Backend architecture
 * REST API integration
 * Role-based system engineering
 
